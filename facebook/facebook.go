@@ -21,9 +21,6 @@ func (fb *Facebook) GetEmail(fbToken string) (string, error) {
 	params := url.Values{}
 	params.Add("fields", "email")
 	params.Add("access_token", fbToken)
-
-	fmt.Println(fbUrl + params.Encode())
-
 	request, err := http.NewRequest("GET", fbUrl+params.Encode(), nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %v", err)
