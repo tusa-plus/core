@@ -111,6 +111,9 @@ func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
 }
 
 func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
