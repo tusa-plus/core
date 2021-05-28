@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/storage/memory"
+	"sync"
 	"testing"
 	"time"
 )
@@ -142,4 +143,25 @@ func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 	if err := checkToken(refresh, data); err == nil {
 		t.Fatalf("refresh must be expired")
 	}
+}
+
+const iterCount = 1000
+const coroutinesCount = 100
+
+func TestTokenStorage_ParallelAccess(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+	var wg sync.WaitGroup
+	for coroutine := 0; coroutine < coroutinesCount; coroutine++ {
+		wg.Add(1)
+		go func() {
+			for iter := 0; iter < iterCount; iter++ {
+				Test_TokenStorage_ParseTokenCorrect(t)
+				Test_TokenStorage_ExpireTokenAccess(t)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }

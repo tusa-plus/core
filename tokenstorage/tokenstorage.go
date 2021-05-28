@@ -43,7 +43,7 @@ func (ts *TokenStorage) NewTokenPair(data map[string]interface{}) (string, strin
 
 func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, error) {
 	parser := jwt.Parser{
-		UseJSONNumber: true,
+		UseJSONNumber:        true,
 		SkipClaimsValidation: false,
 	}
 	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
