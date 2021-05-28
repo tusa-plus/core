@@ -27,8 +27,3 @@ jobs:
         run: |
           cd common
           go test -v --race
-
-      - name: Test Facebook
-        run: |
-          cd facebook
-          go test -v --race
