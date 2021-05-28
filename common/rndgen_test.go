@@ -36,6 +36,9 @@ func Test_RndGen_GenStringABCD01(t *testing.T) {
 }
 
 func Test_RndGen_GenStringParallel(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
 	possible := "abcdABCD01"
 	rndgen := NewRandomGenerator(possible)
 	var wg sync.WaitGroup
