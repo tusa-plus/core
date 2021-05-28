@@ -21,9 +21,9 @@ jobs:
       - name: Test TokenStorage
         run: |
           cd tokenstorage
-          go test -v
+          go test -v --race
 
       - name: Test Common
         run: |
-          cd common
-          go test -v
+          cd ../common
+          go test -v --race
