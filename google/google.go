@@ -17,12 +17,12 @@ const (
 	googleUrl = "https://www.googleapis.com/userinfo/v2/me"
 )
 
-func (google *Google) GetEmail(gglToken string) (string, error) {
+func (google *Google) GetEmail(googleToken string) (string, error) {
 	request, err := http.NewRequest("GET", googleUrl, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %v", err)
 	}
-	request.Header.Add("Authorization", google.tokenType+" "+gglToken)
+	request.Header.Add("Authorization", google.tokenType+" "+googleToken)
 	client := google.httpClientPool.Get()
 	defer google.httpClientPool.Put(client)
 	response, err := client.Do(request)
