@@ -27,7 +27,7 @@ func (google *Google) GetEmail(googleToken string) (string, error) {
 	defer google.httpClientPool.Put(client)
 	response, err := client.Do(request)
 	if err != nil {
-		return "", fmt.Errorf("can't do request to fb: %v", err)
+		return "", fmt.Errorf("can't do request to google: %v", err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
