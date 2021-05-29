@@ -16,9 +16,9 @@ func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
 		if err != nil {
 			switch err {
 			case ErrValidate:
-				return ctx.Status(401).SendString("{}")
+				return ctx.SendStatus(401)
 			default:
-				return ctx.Status(500).SendString("{}")
+				return ctx.SendStatus(500)
 			}
 		}
 		ctx.Context().SetUserValue("facebook_email", email)

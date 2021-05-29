@@ -9,8 +9,6 @@ github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumC
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/gofiber/fiber/v2 v2.10.0 h1:cYwonWaFVa7wBd/LKhgKu7mFNg2CHv5ztY6gzXtrvW8=
 github.com/gofiber/fiber/v2 v2.10.0/go.mod h1:Ah3IJikrKNRepl/HuVawppS25X7FWohwfCSRn7kJG28=
-github.com/gofiber/storage v0.3.0 h1:sJiYI2HdDYEjDaEh9LeOSypRIAuhz4jOUyMteFlGqqE=
-github.com/gofiber/storage v0.3.0/go.mod h1:Y4kXbfi/+ifFA78yNZbCVdNuQg9x/6iLI2gU0Zhn/L4=
 github.com/gofiber/storage/memory v0.0.0-20210527065530-d93f683d4026 h1:z9bBybqoO4i+sQEbMg5xouz5DiizVqMfFISOUu0O93U=
 github.com/gofiber/storage/memory v0.0.0-20210527065530-d93f683d4026/go.mod h1:7aJr9KTG0EoLVCqJ8Pnr2LpRGn2DrcO5euzmpw/GB00=
 github.com/gofiber/utils v0.1.2 h1:1SH2YEz4RlNS0tJlMJ0bGwO0JkqPqvq6TbHK9tXZKtk=
@@ -26,6 +24,8 @@ github.com/myesui/uuid v1.0.0 h1:xCBmH4l5KuvLYc5L7AS7SZg9/jKdIFubM7OVoLqaQUI=
 github.com/myesui/uuid v1.0.0/go.mod h1:2CDfNgU0LR8mIdO8vdWd8i9gWWxLlcoIGGpSNgafq84=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/tusa-plus/core/common v0.0.0-20210529180653-40c29ed02ebc h1:UYrfPJ3Nx71EF6qw0gb6sbCTuQQIFgD5fSV20t4i/sU=
+github.com/tusa-plus/core/common v0.0.0-20210529180653-40c29ed02ebc/go.mod h1:W4oJNpcz0PkC8HQKbSE5gxk0jrcs5WAMwF8+U4skg1w=
 github.com/twinj/uuid v1.0.0 h1:fzz7COZnDrXGTAOHGuUGYd6sG+JMq+AoE7+Jlu0przk=
 github.com/twinj/uuid v1.0.0/go.mod h1:mMgcE1RHFUFqe5AfiwlINXisXfDGro23fWdPUfOMjRY=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=

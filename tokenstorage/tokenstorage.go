@@ -66,6 +66,7 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 			if (validationError.Errors & (jwt.ValidationErrorSignatureInvalid)) > 0 {
 				return nil, ErrInvalidSignature
 			}
+			return nil, ErrInvalidToken
 		}
 		return nil, err
 	}

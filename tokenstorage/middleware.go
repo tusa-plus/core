@@ -1,11 +1,12 @@
 package tokenstorage
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"strings"
 )
 
-func NewCheckAccessTokenMiddleware(ts *TokenStorage) fiber.Handler {
+func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), " ")
 		if len(inputArray) != 2 || inputArray[0] != "Bearer" {
@@ -15,13 +16,16 @@ func NewCheckAccessTokenMiddleware(ts *TokenStorage) fiber.Handler {
 		token, err := ts.ParseToken(tokenString)
 		if err != nil {
 			switch err {
-			case ErrTokenExpired:
-				return ctx.Status(401).SendString("{}")
-			case ErrInvalidToken, ErrInvalidSignature:
-				return ctx.Status(400).SendString("{}")
+			case ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature:
+				return ctx.SendStatus(401)
 			default:
-				return ctx.Status(500).SendString("{}")
+				fmt.Printf("%v\b", err)
+				return ctx.SendStatus(500)
 			}
+		}
+		tokenType, ok := token["token_type"].(string)
+		if !ok || tokenType != expectedTokenType {
+			return ctx.SendStatus(401)
 		}
 		ctx.Context().SetUserValue("token_data", token)
 		return ctx.Next()

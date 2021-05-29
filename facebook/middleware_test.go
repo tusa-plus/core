@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func createFacebookApp(t *testing.T) *fiber.App {
+func createFacebookApp() *fiber.App {
 	app := fiber.New()
 	pool := common.NewHttpClientPool()
 	facebook := Facebook{
@@ -23,7 +23,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	app := createFacebookApp(t)
+	app := createFacebookApp()
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		email, err := ctx.Context().UserValue("facebook_email").(string)
 		if !err {
@@ -48,7 +48,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 }
 
 func Test_MiddlewareGetNoToken(t *testing.T) {
-	app := createFacebookApp(t)
+	app := createFacebookApp()
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})
@@ -63,7 +63,7 @@ func Test_MiddlewareGetNoToken(t *testing.T) {
 }
 
 func Test_MiddlewareGetInvalidToken(t *testing.T) {
-	app := createFacebookApp(t)
+	app := createFacebookApp()
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})

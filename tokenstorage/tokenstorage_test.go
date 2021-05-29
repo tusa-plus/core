@@ -9,26 +9,7 @@ import (
 	"time"
 )
 
-var ts = TokenStorage{
-	secret:            []byte("testsecretkey"),
-	storage:           memory.New(),
-	accessExpiration:  time.Second,
-	refreshExpiration: time.Second * 2,
-}
-
-var data = map[string]interface{}{
-	"test": "12345678",
-	"tmp":  "87654321",
-}
-
-func Test_TokenStorage_NewTokenPair(t *testing.T) {
-	_, _, err := ts.NewTokenPair(map[string]interface{}{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func checkToken(tokenString string, claims map[string]interface{}) error {
+func checkToken(ts *TokenStorage, tokenString string, claims map[string]interface{}) error {
 	tokenData, err := ts.ParseToken(tokenString)
 	if err == nil {
 		for key, value := range claims {
@@ -41,20 +22,53 @@ func checkToken(tokenString string, claims map[string]interface{}) error {
 	return err
 }
 
+func Test_TokenStorage_NewTokenPair(t *testing.T) {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	_, _, err := ts.NewTokenPair(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func Test_TokenStorage_ParseTokenCorrect(t *testing.T) {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
+	}
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err = checkToken(access, data); err != nil {
+	if err = checkToken(&ts, access, data); err != nil {
 		t.Fatalf("invalid access token: %v", err)
 	}
-	if err = checkToken(refresh, data); err != nil {
+	if err = checkToken(&ts, refresh, data); err != nil {
 		t.Fatalf("invalid refresh token: %v", err)
 	}
 }
 
 func Test_TokenStorage_ExpireTokenAccess(t *testing.T) {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
+	}
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -62,15 +76,25 @@ func Test_TokenStorage_ExpireTokenAccess(t *testing.T) {
 	if err := ts.ExpireToken(access); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err := checkToken(access, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
-	if err := checkToken(refresh, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
 
 func Test_TokenStorage_ExpireTokenRefresh(t *testing.T) {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
+	}
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -78,21 +102,37 @@ func Test_TokenStorage_ExpireTokenRefresh(t *testing.T) {
 	if err := ts.ExpireToken(refresh); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err := checkToken(access, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
-	if err := checkToken(refresh, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
 
 func Test_TokenStorage_ParseWrongKey(t *testing.T) {
-	if checkToken("erfermfjiermfi", map[string]interface{}{}) == ErrInvalidToken {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	if checkToken(&ts, "erfermfjiermfi", map[string]interface{}{}) != ErrInvalidToken {
 		t.Fatalf("treated wrong token as correct")
 	}
 }
 
 func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
+	}
 	var ts1 = TokenStorage{
 		secret:            []byte("testsecretkey123"),
 		storage:           memory.New(),
@@ -103,10 +143,10 @@ func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err := checkToken(access, data); err != ErrInvalidSignature {
+	if err := checkToken(&ts, access, data); err != ErrInvalidSignature {
 		t.Fatalf("signature not checked, err: %v", err)
 	}
-	if err := checkToken(refresh, data); err != ErrInvalidSignature {
+	if err := checkToken(&ts, refresh, data); err != ErrInvalidSignature {
 		t.Fatalf("signature not checked, err: %v", err)
 	}
 }
@@ -114,6 +154,16 @@ func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
 func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
+	}
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
 	}
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
@@ -128,7 +178,7 @@ func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 		t.Fatalf("failed to parse exp from token")
 	}
 	time.Sleep(time.Unix(expAt, 0).Add(time.Second).Sub(time.Now()))
-	if err := checkToken(access, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
 	token, err = ts.ParseToken(refresh)
@@ -140,7 +190,7 @@ func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 		t.Fatalf("failed to parse exp from token")
 	}
 	time.Sleep(time.Unix(expAt, 0).Add(time.Second).Sub(time.Now()))
-	if err := checkToken(refresh, data); err != ErrTokenExpired {
+	if err := checkToken(&ts, refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
@@ -152,13 +202,40 @@ func TestTokenStorage_ParallelAccess(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
+	ts := TokenStorage{
+		secret:            []byte("testsecretkey"),
+		storage:           memory.New(),
+		accessExpiration:  time.Second,
+		refreshExpiration: time.Second * 2,
+	}
+	data := map[string]interface{}{
+		"test": "12345678",
+		"tmp":  "87654321",
+	}
 	var wg sync.WaitGroup
 	for coroutine := 0; coroutine < coroutinesCount; coroutine++ {
 		wg.Add(1)
 		go func() {
 			for iter := 0; iter < iterCount; iter++ {
-				Test_TokenStorage_ParseTokenCorrect(t)
-				Test_TokenStorage_ExpireTokenAccess(t)
+				access, refresh, err := ts.NewTokenPair(data)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if err = checkToken(&ts, access, data); err != nil {
+					t.Fatalf("invalid access token: %v", err)
+				}
+				if err = checkToken(&ts, refresh, data); err != nil {
+					t.Fatalf("invalid refresh token: %v", err)
+				}
+				if err := ts.ExpireToken(refresh); err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if err := checkToken(&ts, access, data); err != ErrTokenExpired {
+					t.Fatalf("access must be expired")
+				}
+				if err := checkToken(&ts, refresh, data); err != ErrTokenExpired {
+					t.Fatalf("refresh must be expired")
+				}
 			}
 			wg.Done()
 		}()
