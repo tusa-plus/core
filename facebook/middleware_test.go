@@ -2,7 +2,7 @@ package facebook
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/tusa-plus/core/common"
+	"github.com/tusa-plus/core/utils"
 	"gopkg.in/ini.v1"
 	"net/http/httptest"
 	"testing"
