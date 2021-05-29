@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tusa-plus/core/common"
+	"github.com/tusa-plus/core/utils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 )
 
 type Facebook struct {
-	httpClientPool *common.HttpClientPool
+	httpClientPool *utils.HttpClientPool
 }
 
 const (

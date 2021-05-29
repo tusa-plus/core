@@ -10,7 +10,7 @@ import (
 
 func createFacebookApp() *fiber.App {
 	app := fiber.New()
-	pool := common.NewHttpClientPool()
+	pool := utils.NewHttpClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
 	}

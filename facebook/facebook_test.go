@@ -2,7 +2,7 @@ package facebook
 
 import (
 	"context"
-	"github.com/tusa-plus/core/common"
+	"github.com/tusa-plus/core/utils"
 	"gopkg.in/ini.v1"
 	"testing"
 )
@@ -12,7 +12,7 @@ func Test_FacebookGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	pool := common.NewHttpClientPool()
+	pool := utils.NewHttpClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
 	}
@@ -27,7 +27,7 @@ func Test_FacebookGetEmail(t *testing.T) {
 }
 
 func Test_FacebookGetEmailInvalidToken(t *testing.T) {
-	pool := common.NewHttpClientPool()
+	pool := utils.NewHttpClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
 	}
