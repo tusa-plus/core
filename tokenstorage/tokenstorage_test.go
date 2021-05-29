@@ -62,10 +62,10 @@ func Test_TokenStorage_ExpireTokenAccess(t *testing.T) {
 	if err := ts.ExpireToken(access); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err := checkToken(access, data); err == nil {
+	if err := checkToken(access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
-	if err := checkToken(refresh, data); err == nil {
+	if err := checkToken(refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
@@ -78,16 +78,16 @@ func Test_TokenStorage_ExpireTokenRefresh(t *testing.T) {
 	if err := ts.ExpireToken(refresh); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if err := checkToken(access, data); err == nil {
+	if err := checkToken(access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
-	if err := checkToken(refresh, data); err == nil {
+	if err := checkToken(refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
 
 func Test_TokenStorage_ParseWrongKey(t *testing.T) {
-	if checkToken("erfermfjiermfi", map[string]interface{}{}) == nil {
+	if checkToken("erfermfjiermfi", map[string]interface{}{}) == ErrInvalidToken {
 		t.Fatalf("treated wrong token as correct")
 	}
 }
@@ -103,11 +103,11 @@ func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if checkToken(access, data) == nil {
-		t.Fatalf("signature not checked")
+	if err := checkToken(access, data); err != ErrInvalidSignature {
+		t.Fatalf("signature not checked, err: %v", err)
 	}
-	if checkToken(refresh, data) == nil {
-		t.Fatalf("signature not checked")
+	if err := checkToken(refresh, data); err != ErrInvalidSignature {
+		t.Fatalf("signature not checked, err: %v", err)
 	}
 }
 
@@ -128,7 +128,7 @@ func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 		t.Fatalf("failed to parse exp from token")
 	}
 	time.Sleep(time.Unix(expAt, 0).Add(time.Second).Sub(time.Now()))
-	if err := checkToken(access, data); err == nil {
+	if err := checkToken(access, data); err != ErrTokenExpired {
 		t.Fatalf("access must be expired")
 	}
 	token, err = ts.ParseToken(refresh)
@@ -140,7 +140,7 @@ func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
 		t.Fatalf("failed to parse exp from token")
 	}
 	time.Sleep(time.Unix(expAt, 0).Add(time.Second).Sub(time.Now()))
-	if err := checkToken(refresh, data); err == nil {
+	if err := checkToken(refresh, data); err != ErrTokenExpired {
 		t.Fatalf("refresh must be expired")
 	}
 }
