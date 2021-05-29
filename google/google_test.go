@@ -11,7 +11,7 @@ var google = Google{
 	tokenType:      "Bearer",
 }
 
-func Test_ManualFbGetEmail(t *testing.T) {
+func Test_ManualGoogleGetEmail(t *testing.T) {
 	cfg, err := ini.Load("./config_test.ini")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
