@@ -14,7 +14,7 @@ func createTsApp() (*fiber.App, *TokenStorage) {
 		secret:            []byte("testsecretkey"),
 		storage:           memory.New(),
 		accessExpiration:  time.Second,
-		refreshExpiration: time.Second,
+		refreshExpiration: time.Second * 2,
 	}
 	app.Use("/access", NewCheckTokenMiddleware(&ts, "access"))
 	app.Use("/refresh", NewCheckTokenMiddleware(&ts, "refresh"))
@@ -90,7 +90,7 @@ func Test_MiddlewareTestExpired(t *testing.T) {
 	claims := map[string]interface{}{
 		"test_date": "12345678",
 	}
-	app.Get("/access", func(ctx *fiber.Ctx) error {
+	app.Get("/refresh", func(ctx *fiber.Ctx) error {
 		tokenData, ok := ctx.Context().UserValue("token_data").(map[string]interface{})
 		if !ok {
 			t.Fatalf("failed to convert tokenData to map")
@@ -102,16 +102,16 @@ func Test_MiddlewareTestExpired(t *testing.T) {
 		}
 		return ctx.SendStatus(200)
 	})
-	access, _, err := ts.NewTokenPair(claims)
+	_, refresh, err := ts.NewTokenPair(claims)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	err = ts.ExpireToken(access)
+	err = ts.ExpireToken(refresh)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	request := httptest.NewRequest("GET", "/access", nil)
-	request.Header.Add("Authorization", "Bearer "+access)
+	request := httptest.NewRequest("GET", "/refresh", nil)
+	request.Header.Add("Authorization", "Bearer "+refresh)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)

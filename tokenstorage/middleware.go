@@ -23,7 +23,11 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 				return ctx.SendStatus(500)
 			}
 		}
-		tokenType, ok := token["token_type"].(string)
+		tokenTypeRaw, ok := token[TokenTypeProperty]
+		if !ok {
+			return ctx.SendStatus(401)
+		}
+		tokenType, ok := tokenTypeRaw.(string)
 		if !ok || tokenType != expectedTokenType {
 			return ctx.SendStatus(401)
 		}
