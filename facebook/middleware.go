@@ -12,7 +12,7 @@ func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
 			return ctx.Status(401).SendString("{}")
 		}
 		tokenString := inputArray[1]
-		email, err := facebook.GetEmail(tokenString)
+		email, err := facebook.GetEmail(ctx.Context(), tokenString)
 		if err != nil {
 			switch err {
 			case ErrValidate:

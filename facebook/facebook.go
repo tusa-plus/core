@@ -1,6 +1,7 @@
 package facebook
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tusa-plus/core/common"
@@ -20,7 +21,7 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (fb *Facebook) GetEmail(fbToken string) (string, error) {
+func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error) {
 	params := url.Values{}
 	params.Add("fields", "email")
 	params.Add("access_token", fbToken)
@@ -30,7 +31,7 @@ func (fb *Facebook) GetEmail(fbToken string) (string, error) {
 	}
 	client := fb.httpClientPool.Get()
 	defer fb.httpClientPool.Put(client)
-	response, err := client.Do(request)
+	response, err := client.Do(request.WithContext(ctx))
 	if err != nil {
 		return "", ErrDoRequest
 	}
