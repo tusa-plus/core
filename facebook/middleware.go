@@ -21,7 +21,7 @@ func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
 				return ctx.SendStatus(500)
 			}
 		}
-		ctx.Context().SetUserValue("facebook_email", email)
+		ctx.Context().SetUserValue("email", email)
 		return ctx.Next()
 	}
 }
