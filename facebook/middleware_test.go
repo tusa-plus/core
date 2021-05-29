@@ -25,7 +25,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	}
 	app := createFacebookApp()
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		email, err := ctx.Context().UserValue("facebook_email").(string)
+		email, err := ctx.Context().UserValue("email").(string)
 		if !err {
 			t.Fatalf("unexpected error parsing email")
 		}
