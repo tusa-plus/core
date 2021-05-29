@@ -16,7 +16,7 @@ func Test_ManualFbGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	email, err := google.GetEmail(cfg.Section("ggl").Key("token").String())
+	email, err := google.GetEmail(cfg.Section("google").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
