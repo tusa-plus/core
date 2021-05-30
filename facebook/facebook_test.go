@@ -48,3 +48,19 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 		t.Fatalf("expected validation error: %v", err)
 	}
 }
+
+func Test_FacebookGetEmailEmptyToken(t *testing.T) {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	pool := utils.NewHttpClientPool()
+	facebook := Facebook{
+		httpClientPool: &pool,
+		logger:         logger,
+	}
+	_, err = facebook.GetEmail(context.Background(), "")
+	if err != ErrValidate {
+		t.Fatalf("expected validation error: %v", err)
+	}
+}
