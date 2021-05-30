@@ -3,6 +3,7 @@ package tokenstorage
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 	"strings"
 )
 
@@ -23,11 +24,17 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 		}
 		tokenTypeRaw, ok := token[TokenTypeProperty]
 		if !ok {
-			return ctx.SendStatus(401)
+			ts.logger.Error("token doesn't contain token_type",
+				zap.String("token_string", tokenString),
+			)
+			return ctx.SendStatus(500)
 		}
 		tokenType, ok := tokenTypeRaw.(string)
 		if !ok || tokenType != expectedTokenType {
-			return ctx.SendStatus(401)
+			ts.logger.Error("token_type is not string",
+				zap.String("token_string", tokenString),
+			)
+			return ctx.SendStatus(500)
 		}
 		ctx.Context().SetUserValue("token_data", token)
 		return ctx.Next()
