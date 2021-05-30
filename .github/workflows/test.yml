@@ -8,7 +8,22 @@ on:
 
 jobs:
 
-  build:
+  test-facebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Test Facebook
+        run: |
+          cd facebook
+          go test -v --race
+
+  test-tokenstorage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,18 +38,20 @@ jobs:
           cd tokenstorage
           go test -v --race
 
+  test-utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
       - name: Test Utils
         run: |
           cd utils
           go test -v --race
 
-      - name: Test Facebook
-        run: |
-          cd facebook
-          go test -v --race
-
-  golangci:
-    name: lint
+  lint-facebook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,3 +60,23 @@ jobs:
         with:
           version: v1.40
           working-directory: facebook
+
+  lint-tokenstorage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.40
+          working-directory: tokenstorage
+
+  lint-utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.40
+          working-directory: utils
