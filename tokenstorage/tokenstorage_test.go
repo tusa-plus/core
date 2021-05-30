@@ -41,7 +41,6 @@ func checkToken(ts *TokenStorage, tokenString string, claims map[string]interfac
 }
 
 func Test_TokenStorage_NewTokenPair(t *testing.T) {
-	t.Parallel()
 	ts, _ := createTSWithTestData(t)
 	_, _, err := ts.NewTokenPair(map[string]interface{}{})
 	if err != nil {
@@ -50,7 +49,6 @@ func Test_TokenStorage_NewTokenPair(t *testing.T) {
 }
 
 func Test_TokenStorage_ParseTokenCorrect(t *testing.T) {
-	t.Parallel()
 	ts, data := createTSWithTestData(t)
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
@@ -65,7 +63,6 @@ func Test_TokenStorage_ParseTokenCorrect(t *testing.T) {
 }
 
 func Test_TokenStorage_ExpireTokenAccess(t *testing.T) {
-	t.Parallel()
 	ts, data := createTSWithTestData(t)
 	access, _, err := ts.NewTokenPair(data)
 	if err != nil {
@@ -77,7 +74,6 @@ func Test_TokenStorage_ExpireTokenAccess(t *testing.T) {
 }
 
 func Test_TokenStorage_ExpireTokenRefresh(t *testing.T) {
-	t.Parallel()
 	ts, data := createTSWithTestData(t)
 	access, refresh, err := ts.NewTokenPair(data)
 	if err != nil {
@@ -95,7 +91,6 @@ func Test_TokenStorage_ExpireTokenRefresh(t *testing.T) {
 }
 
 func Test_TokenStorage_ParseWrongKey(t *testing.T) {
-	t.Parallel()
 	ts, _ := createTSWithTestData(t)
 	if !errors.Is(checkToken(ts, "erfermfjiermfi", map[string]interface{}{}), ErrInvalidToken) {
 		t.Fatalf("treated wrong token as correct")
@@ -103,7 +98,6 @@ func Test_TokenStorage_ParseWrongKey(t *testing.T) {
 }
 
 func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
-	t.Parallel()
 	ts, data := createTSWithTestData(t)
 	ts1, err := NewTokenStorage([]byte("testsecretkey1"), nil, memory.New(), time.Second, time.Second*2)
 	if err != nil {
@@ -122,7 +116,6 @@ func Test_TokenStorage_ParseWrongSignature(t *testing.T) {
 }
 
 func Test_TokenStorage_TokenExpirationCheck(t *testing.T) {
-	t.Parallel()
 	if testing.Short() {
 		t.Skip()
 	}
@@ -161,7 +154,6 @@ const iterCount = 1000
 const coroutinesCount = 100
 
 func TestTokenStorage_ParallelAccess(t *testing.T) {
-	t.Parallel()
 	if testing.Short() {
 		t.Skip()
 	}
