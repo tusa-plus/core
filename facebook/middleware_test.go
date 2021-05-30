@@ -11,7 +11,7 @@ import (
 
 func createFacebookApp(t *testing.T) *fiber.App {
 	app := fiber.New()
-	pool := utils.NewHttpClientPool()
+	pool := utils.NewHTTPClientPool()
 	logger, err := zap.NewProduction()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)

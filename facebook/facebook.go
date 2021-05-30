@@ -13,7 +13,7 @@ import (
 
 type Facebook struct {
 	logger         *zap.Logger
-	httpClientPool *utils.HttpClientPool
+	httpClientPool *utils.HTTPClientPool
 }
 
 const (

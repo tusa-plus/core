@@ -19,7 +19,7 @@ func Test_FacebookGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	pool := utils.NewHttpClientPool()
+	pool := utils.NewHTTPClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
 		logger:         logger,
@@ -40,7 +40,7 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	pool := utils.NewHttpClientPool()
+	pool := utils.NewHTTPClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
 		logger:         logger,
