@@ -3,15 +3,21 @@ package facebook
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/tusa-plus/core/utils"
+	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
 	"net/http/httptest"
 	"testing"
 )
 
-func createFacebookApp() *fiber.App {
+func createFacebookApp(t *testing.T) *fiber.App {
 	app := fiber.New()
 	pool := utils.NewHttpClientPool()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
 	facebook := Facebook{
+		logger:         logger,
 		httpClientPool: &pool,
 	}
 	app.Use(NewFacebookEmailMiddleware(&facebook))
@@ -23,7 +29,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	app := createFacebookApp()
+	app := createFacebookApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		email, err := ctx.Context().UserValue("email").(string)
 		if !err {
@@ -48,7 +54,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 }
 
 func Test_MiddlewareGetNoToken(t *testing.T) {
-	app := createFacebookApp()
+	app := createFacebookApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})
@@ -63,7 +69,7 @@ func Test_MiddlewareGetNoToken(t *testing.T) {
 }
 
 func Test_MiddlewareGetInvalidToken(t *testing.T) {
-	app := createFacebookApp()
+	app := createFacebookApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})

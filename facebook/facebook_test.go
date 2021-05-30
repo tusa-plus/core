@@ -3,11 +3,16 @@ package facebook
 import (
 	"context"
 	"github.com/tusa-plus/core/utils"
+	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
 	"testing"
 )
 
 func Test_FacebookGetEmail(t *testing.T) {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
 	cfg, err := ini.Load("./config_test.ini")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -15,6 +20,7 @@ func Test_FacebookGetEmail(t *testing.T) {
 	pool := utils.NewHttpClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
+		logger:         logger,
 	}
 	email, err := facebook.GetEmail(context.Background(), cfg.Section("fb").Key("token").String())
 	if err != nil {
@@ -27,11 +33,16 @@ func Test_FacebookGetEmail(t *testing.T) {
 }
 
 func Test_FacebookGetEmailInvalidToken(t *testing.T) {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
 	pool := utils.NewHttpClientPool()
 	facebook := Facebook{
 		httpClientPool: &pool,
+		logger:         logger,
 	}
-	_, err := facebook.GetEmail(context.Background(), "xxttzz")
+	_, err = facebook.GetEmail(context.Background(), "xxttzz")
 	if err != ErrValidate {
 		t.Fatalf("expected validation error: %v", err)
 	}

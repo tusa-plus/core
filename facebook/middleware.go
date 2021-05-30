@@ -1,6 +1,7 @@
 package facebook
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"strings"
 )
@@ -14,10 +15,9 @@ func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
 		tokenString := inputArray[1]
 		email, err := facebook.GetEmail(ctx.Context(), tokenString)
 		if err != nil {
-			switch err {
-			case ErrValidate:
+			if errors.Is(err, ErrValidate) {
 				return ctx.SendStatus(401)
-			default:
+			} else {
 				return ctx.SendStatus(500)
 			}
 		}
