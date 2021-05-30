@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -15,8 +16,8 @@ func Test_RndGen_GenString01(t *testing.T) {
 	for iter := 0; iter < iterCount; iter++ {
 		result := rndgen.NextString(rndgen.NextIntN(10) + 1)
 		for index := range result {
-			if strings.Index(possible, string(result[index])) == -1 {
-				t.Fatalf("generated string containes impossible symbols")
+			if !strings.Contains(possible, string(result[index])) {
+				t.Fatalf("generated string contains impossible symbols")
 			}
 		}
 	}
@@ -28,8 +29,8 @@ func Test_RndGen_GenStringABCD01(t *testing.T) {
 	for iter := 0; iter < iterCount; iter++ {
 		result := rndgen.NextString(rndgen.NextIntN(10) + 1)
 		for index := range result {
-			if strings.Index(possible, string(result[index])) == -1 {
-				t.Fatalf("generated string containes impossible symbols")
+			if !strings.Contains(possible, string(result[index])) {
+				t.Fatalf("generated string contains impossible symbols")
 			}
 		}
 	}
@@ -39,22 +40,30 @@ func Test_RndGen_GenStringParallel(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
-	possible := "abcdABCD01"
+	possible := "abcdABCD012345"
 	rndgen := NewRandomGenerator(possible)
 	var wg sync.WaitGroup
+	var errMutex sync.Mutex
+	var err error = nil
 	for coroutine := 0; coroutine < coroutinesCount; coroutine++ {
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			for iter := 0; iter < iterCount; iter++ {
 				result := rndgen.NextString(rndgen.NextIntN(10) + 1)
 				for index := range result {
-					if strings.Index(possible, string(result[index])) == -1 {
-						t.Fatalf("generated string containes impossible symbols")
+					if !strings.Contains(possible, string(result[index])) {
+						errMutex.Lock()
+						err = fmt.Errorf("generated string contains impossible symbols")
+						errMutex.Unlock()
+						return
 					}
 				}
 			}
-			wg.Done()
 		}()
 	}
 	wg.Wait()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 }

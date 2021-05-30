@@ -1,7 +1,7 @@
 package tokenstorage
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"strings"
 )
@@ -15,11 +15,9 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 		tokenString := inputArray[1]
 		token, err := ts.ParseToken(tokenString)
 		if err != nil {
-			switch err {
-			case ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature:
+			if errors.Is(err, ErrTokenExpired) || errors.Is(err, ErrInvalidToken) || errors.Is(err, ErrInvalidSignature) {
 				return ctx.SendStatus(401)
-			default:
-				fmt.Printf("%v\b", err)
+			} else {
 				return ctx.SendStatus(500)
 			}
 		}

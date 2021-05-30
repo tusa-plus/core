@@ -3,26 +3,29 @@ package tokenstorage
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/storage/memory"
+	"go.uber.org/zap"
 	"net/http/httptest"
 	"testing"
 	"time"
 )
 
-func createTsApp() (*fiber.App, *TokenStorage) {
+func createTSApp(t *testing.T) (*fiber.App, *TokenStorage) {
 	app := fiber.New()
-	ts := TokenStorage{
-		secret:            []byte("testsecretkey"),
-		storage:           memory.New(),
-		accessExpiration:  time.Second,
-		refreshExpiration: time.Second * 2,
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
-	app.Use("/access", NewCheckTokenMiddleware(&ts, "access"))
-	app.Use("/refresh", NewCheckTokenMiddleware(&ts, "refresh"))
-	return app, &ts
+	ts, err := NewTokenStorage([]byte("testsecretkey"), logger, memory.New(), time.Second, time.Second*2)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	app.Use("/access", NewCheckTokenMiddleware(ts, "access"))
+	app.Use("/refresh", NewCheckTokenMiddleware(ts, "refresh"))
+	return app, ts
 }
 
 func Test_MiddlewareTestAccessToken(t *testing.T) {
-	app, ts := createTsApp()
+	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
 	}
@@ -54,7 +57,7 @@ func Test_MiddlewareTestAccessToken(t *testing.T) {
 }
 
 func Test_MiddlewareTestRefreshToken(t *testing.T) {
-	app, ts := createTsApp()
+	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
 	}
@@ -86,7 +89,7 @@ func Test_MiddlewareTestRefreshToken(t *testing.T) {
 }
 
 func Test_MiddlewareTestExpired(t *testing.T) {
-	app, ts := createTsApp()
+	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
 	}
@@ -122,7 +125,7 @@ func Test_MiddlewareTestExpired(t *testing.T) {
 }
 
 func Test_MiddlewareTestInvalidToken(t *testing.T) {
-	app, _ := createTsApp()
+	app, _ := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
 	}
