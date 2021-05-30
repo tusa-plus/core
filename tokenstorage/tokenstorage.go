@@ -31,7 +31,8 @@ var ErrInvalidSignature = fmt.Errorf("token has invalid signature")
 var ErrInvalidToken = fmt.Errorf("token is invalid")
 var ErrExpireNonRefresh = fmt.Errorf("use refresh token to expire pair")
 var ErrMissingStorage = fmt.Errorf("missing storage in create")
-var ErrUnknown = fmt.Errorf("unknow error")
+var ErrInvalidFields = fmt.Errorf("invalid fields error")
+var ErrUnknown = fmt.Errorf("unknown error")
 
 func NewTokenStorage(
 	secret []byte,
@@ -76,7 +77,7 @@ func (ts *TokenStorage) NewTokenPair(data map[string]interface{}) (string, strin
 		ts.logger.Error("unexpected error creating token",
 			zap.Error(err),
 		)
-		return "", "", ErrUnknown
+		return "", "", ErrInvalidFields
 	}
 	// create refresh token
 	claims[TokenExpProperty] = time.Now().Add(ts.refreshExpiration).Unix()
@@ -87,7 +88,7 @@ func (ts *TokenStorage) NewTokenPair(data map[string]interface{}) (string, strin
 		ts.logger.Error("unexpected error creating token",
 			zap.Error(err),
 		)
-		return "", "", ErrUnknown
+		return "", "", ErrInvalidFields
 	}
 	return accessToken, refreshToken, nil
 }
@@ -119,7 +120,7 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 			zap.Error(err),
 			zap.String("token_string", tokenString),
 		)
-		return nil, err
+		return nil, ErrUnknown
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid || claims.Valid() != nil {
@@ -130,14 +131,14 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 		ts.logger.Warn("token doesn't contain token_id",
 			zap.String("token_string", tokenString),
 		)
-		return nil, ErrUnknown
+		return nil, ErrInvalidFields
 	}
 	tokenID, ok := tokenIDRaw.(string)
 	if !ok {
 		ts.logger.Warn("token_id is not string",
 			zap.String("token_string", tokenString),
 		)
-		return nil, ErrUnknown
+		return nil, ErrInvalidFields
 	}
 	data, err := ts.storage.Get(tokenID)
 	if data == nil && err == nil {
@@ -149,7 +150,7 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 			zap.String("token_string", tokenString),
 			zap.String("token_id", tokenID),
 		)
-		return nil, ErrUnknown
+		return nil, ErrInvalidFields
 	}
 	return nil, ErrTokenExpired
 }
@@ -165,14 +166,14 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 			zap.Error(err),
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	tokenType, ok := tokenTypeRaw.(string)
 	if !ok {
 		ts.logger.Warn("token_type is not string",
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	if tokenType != TokenTypeRefresh {
 		return ErrExpireNonRefresh
@@ -182,25 +183,25 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 		ts.logger.Warn("token doesn't contain exp",
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	expAt, err := expAtRaw.(json.Number).Int64()
 	if err != nil {
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	tokenIDRaw, ok := token[tokenIDProperty]
 	if !ok {
 		ts.logger.Warn("token doesn't contain token_id",
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	tokenID, ok := tokenIDRaw.(string)
 	if !ok {
 		ts.logger.Warn("token_id is not string",
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	err = ts.storage.Set(tokenID, []byte{0}, time.Until(time.Unix(expAt, 0).Add(time.Second)))
 	if err != nil {
@@ -208,7 +209,7 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 			zap.Error(err),
 			zap.String("token_string", tokenString),
 		)
-		return ErrUnknown
+		return ErrInvalidFields
 	}
 	return nil
 }
