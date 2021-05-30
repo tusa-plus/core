@@ -127,14 +127,14 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 	}
 	tokenIDRaw, ok := claims[tokenIDProperty]
 	if !ok {
-		ts.logger.Error("token doesn't contain token_id",
+		ts.logger.Warn("token doesn't contain token_id",
 			zap.String("token_string", tokenString),
 		)
 		return nil, ErrUnknown
 	}
 	tokenID, ok := tokenIDRaw.(string)
 	if !ok {
-		ts.logger.Error("token_id is not string",
+		ts.logger.Warn("token_id is not string",
 			zap.String("token_string", tokenString),
 		)
 		return nil, ErrUnknown
@@ -169,7 +169,7 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	}
 	tokenType, ok := tokenTypeRaw.(string)
 	if !ok {
-		ts.logger.Error("token_type is not string",
+		ts.logger.Warn("token_type is not string",
 			zap.String("token_string", tokenString),
 		)
 		return ErrUnknown
@@ -179,7 +179,7 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	}
 	expAtRaw, ok := token[TokenExpProperty]
 	if !ok {
-		ts.logger.Error("token doesn't contain exp",
+		ts.logger.Warn("token doesn't contain exp",
 			zap.String("token_string", tokenString),
 		)
 		return ErrUnknown
@@ -190,14 +190,14 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	}
 	tokenIDRaw, ok := token[tokenIDProperty]
 	if !ok {
-		ts.logger.Error("token doesn't contain token_id",
+		ts.logger.Warn("token doesn't contain token_id",
 			zap.String("token_string", tokenString),
 		)
 		return ErrUnknown
 	}
 	tokenID, ok := tokenIDRaw.(string)
 	if !ok {
-		ts.logger.Error("token_id is not string",
+		ts.logger.Warn("token_id is not string",
 			zap.String("token_string", tokenString),
 		)
 		return ErrUnknown
