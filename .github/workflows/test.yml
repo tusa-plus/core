@@ -23,9 +23,9 @@ jobs:
           cd tokenstorage
           go test -v --race
 
-      - name: Test Common
+      - name: Test Utils
         run: |
-          cd common
+          cd utils
           go test -v --race
 
       - name: Test Facebook
