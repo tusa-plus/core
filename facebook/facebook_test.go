@@ -43,8 +43,7 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 		httpClientPool: &pool,
 		logger:         logger,
 	}
-	_, err = facebook.GetEmail(context.Background(), "xxttzz")
-	if !errors.Is(err, ErrValidate) {
+	if _, err = facebook.GetEmail(context.Background(), "ewfwefewrwerwe"); !errors.Is(err, ErrValidate) {
 		t.Fatalf("expected validation error: %v", err)
 	}
 }
@@ -59,7 +58,7 @@ func Test_FacebookGetEmailEmptyToken(t *testing.T) {
 		httpClientPool: &pool,
 		logger:         logger,
 	}
-	if _, err = facebook.GetEmail(context.Background(), ""); err != ErrValidate {
+	if _, err = facebook.GetEmail(context.Background(), ""); !errors.Is(err, ErrValidate) {
 		t.Fatalf("expected validation error: %v", err)
 	}
 }

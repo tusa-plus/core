@@ -46,7 +46,7 @@ func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error
 		return "", ErrDoRequest
 	}
 	defer func() {
-		if err := response.Body.Close(); err != nil {
+		if err := response.Body.Close(); err != nil { //nolint:govet
 			fb.logger.Error("unexpected error during body close",
 				zap.Error(err),
 			)
@@ -59,12 +59,12 @@ func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error
 		)
 		return "", ErrDoRequest
 	}
-	var responseJson map[string]json.RawMessage
-	if err := json.Unmarshal(body, &responseJson); err != nil {
+	var responseJSON map[string]json.RawMessage
+	if err := json.Unmarshal(body, &responseJSON); err != nil {
 		return "", ErrValidate
 	}
 	var email string
-	if err := json.Unmarshal(responseJson["email"], &email); err != nil {
+	if err := json.Unmarshal(responseJSON["email"], &email); err != nil {
 		return "", ErrValidate
 	}
 	return email, nil
