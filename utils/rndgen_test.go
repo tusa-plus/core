@@ -11,6 +11,7 @@ const iterCount = 10000
 const coroutinesCount = 100
 
 func Test_RndGen_GenString01(t *testing.T) {
+	t.Parallel()
 	possible := "01"
 	rndgen := NewRandomGenerator(possible)
 	for iter := 0; iter < iterCount; iter++ {
@@ -24,6 +25,7 @@ func Test_RndGen_GenString01(t *testing.T) {
 }
 
 func Test_RndGen_GenStringABCD01(t *testing.T) {
+	t.Parallel()
 	possible := "abcdABCD01"
 	rndgen := NewRandomGenerator(possible)
 	for iter := 0; iter < iterCount; iter++ {
@@ -40,6 +42,7 @@ func Test_RndGen_GenStringParallel(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
+	t.Parallel()
 	possible := "abcdABCD012345"
 	rndgen := NewRandomGenerator(possible)
 	var wg sync.WaitGroup

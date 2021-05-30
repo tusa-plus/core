@@ -10,7 +10,6 @@ import (
 )
 
 func createFacebookApp(t *testing.T) *fiber.App {
-	t.Parallel()
 	app := fiber.New()
 	pool := utils.NewHttpClientPool()
 	logger, err := zap.NewProduction()
@@ -56,6 +55,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 }
 
 func Test_MiddlewareGetNoToken(t *testing.T) {
+	t.Parallel()
 	app := createFacebookApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
@@ -71,6 +71,7 @@ func Test_MiddlewareGetNoToken(t *testing.T) {
 }
 
 func Test_MiddlewareGetInvalidToken(t *testing.T) {
+	t.Parallel()
 	app := createFacebookApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
