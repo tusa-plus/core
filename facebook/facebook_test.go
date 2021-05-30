@@ -2,6 +2,7 @@ package facebook
 
 import (
 	"context"
+	"errors"
 	"github.com/tusa-plus/core/utils"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
@@ -9,6 +10,7 @@ import (
 )
 
 func Test_FacebookGetEmail(t *testing.T) {
+	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -33,6 +35,7 @@ func Test_FacebookGetEmail(t *testing.T) {
 }
 
 func Test_FacebookGetEmailInvalidToken(t *testing.T) {
+	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -44,9 +47,8 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
-		if _, err = facebook.GetEmail(context.Background(), invalidTokens[index]); err != ErrValidate {
+		if _, err = facebook.GetEmail(context.Background(), invalidTokens[index]); errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
 	}
 }
-

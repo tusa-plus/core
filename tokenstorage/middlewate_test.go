@@ -25,6 +25,7 @@ func createTSApp(t *testing.T) (*fiber.App, *TokenStorage) {
 }
 
 func Test_MiddlewareTestAccessToken(t *testing.T) {
+	t.Parallel()
 	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
@@ -57,6 +58,7 @@ func Test_MiddlewareTestAccessToken(t *testing.T) {
 }
 
 func Test_MiddlewareTestRefreshToken(t *testing.T) {
+	t.Parallel()
 	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
@@ -89,6 +91,7 @@ func Test_MiddlewareTestRefreshToken(t *testing.T) {
 }
 
 func Test_MiddlewareTestExpired(t *testing.T) {
+	t.Parallel()
 	app, ts := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",
@@ -125,6 +128,7 @@ func Test_MiddlewareTestExpired(t *testing.T) {
 }
 
 func Test_MiddlewareTestInvalidToken(t *testing.T) {
+	t.Parallel()
 	app, _ := createTSApp(t)
 	claims := map[string]interface{}{
 		"test_date": "12345678",

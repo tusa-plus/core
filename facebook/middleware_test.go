@@ -10,6 +10,7 @@ import (
 )
 
 func createFacebookApp(t *testing.T) *fiber.App {
+	t.Parallel()
 	app := fiber.New()
 	pool := utils.NewHttpClientPool()
 	logger, err := zap.NewProduction()
@@ -25,6 +26,7 @@ func createFacebookApp(t *testing.T) *fiber.App {
 }
 
 func Test_MiddlewareGetValidEmail(t *testing.T) {
+	t.Parallel()
 	cfg, err := ini.Load("./config_test.ini")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
