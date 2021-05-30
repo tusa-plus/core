@@ -7,11 +7,11 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.10.0
-	github.com/gofiber/storage v0.3.0
-	github.com/gofiber/storage/memory v0.0.0-20210527065530-d93f683d4026
+	github.com/gofiber/storage/memory v0.0.0-20210528150036-60042533671e
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/tusa-plus/core/utils v0.0.0-20210529234836-aab992e4d7b6 // indirect
 	github.com/twinj/uuid v1.0.0
 	github.com/valyala/fasthttp v1.25.0 // indirect
 	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect

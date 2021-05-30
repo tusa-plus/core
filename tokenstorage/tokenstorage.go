@@ -16,23 +16,37 @@ type TokenStorage struct {
 	refreshExpiration time.Duration
 }
 
+const TokenTypeAccess = "access"
+const TokenTypeRefresh = "refresh"
+
+const TokenTypeProperty = "token_type"
+const TokenIdProperty = "token_id"
+const TokenExpProperty = "exp"
+
+var ErrTokenExpired = fmt.Errorf("token expired")
+var ErrInvalidSignature = fmt.Errorf("token has invalid signature")
+var ErrInvalidToken = fmt.Errorf("token is invalid")
+var ErrExpireNonRefresh = fmt.Errorf("use refresh token to expire pair")
+
 func (ts *TokenStorage) NewTokenPair(data map[string]interface{}) (string, string, error) {
 	tokenId := uuid.NewV4().String()
 	claims := jwt.MapClaims{
-		"token_id": tokenId,
+		TokenIdProperty: tokenId,
 	}
 	for key, value := range data {
 		claims[key] = value
 	}
 	// create access token
-	claims["exp"] = time.Now().Add(ts.accessExpiration).Unix()
+	claims[TokenExpProperty] = time.Now().Add(ts.accessExpiration).Unix()
+	claims[TokenTypeProperty] = TokenTypeAccess
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	accessToken, err := unsignedToken.SignedString(ts.secret)
 	if err != nil {
 		return "", "", nil
 	}
 	// create refresh token
-	claims["exp"] = time.Now().Add(ts.refreshExpiration).Unix()
+	claims[TokenExpProperty] = time.Now().Add(ts.refreshExpiration).Unix()
+	claims[TokenTypeProperty] = TokenTypeRefresh
 	unsignedToken = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	refreshToken, err := unsignedToken.SignedString(ts.secret)
 	if err != nil {
@@ -48,20 +62,33 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 	}
 	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, ErrInvalidSignature
 		}
 		return ts.secret, nil
 	})
 	if err != nil {
+		if validationError, ok := err.(*jwt.ValidationError); ok {
+			if (validationError.Errors & jwt.ValidationErrorExpired) > 0 {
+				return nil, ErrTokenExpired
+			}
+			if (validationError.Errors & (jwt.ValidationErrorSignatureInvalid)) > 0 {
+				return nil, ErrInvalidSignature
+			}
+			return nil, ErrInvalidToken
+		}
 		return nil, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid || claims.Valid() != nil {
-		return nil, fmt.Errorf("failed to parse JWT token")
+		return nil, ErrInvalidToken
 	}
-	tokenId, ok := claims["token_id"].(string)
+	tokenIdRaw, ok := claims[TokenIdProperty]
 	if !ok {
-		return nil, fmt.Errorf("failed to parse token_id from token")
+		return nil, ErrInvalidToken
+	}
+	tokenId, ok := tokenIdRaw.(string)
+	if !ok {
+		return nil, ErrInvalidToken
 	}
 	data, err := ts.storage.Get(tokenId)
 	if data == nil && err == nil {
@@ -70,7 +97,7 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 	if err != nil {
 		return nil, err
 	}
-	return nil, fmt.Errorf("token is expired")
+	return nil, ErrTokenExpired
 }
 
 func (ts *TokenStorage) ExpireToken(tokenString string) error {
@@ -78,10 +105,18 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	if err != nil {
 		return err
 	}
-	expAt, err := token["exp"].(json.Number).Int64()
-	if err != nil {
-		return fmt.Errorf("failed to parse exp from token")
+	tokenTypeRaw, ok := token[TokenTypeProperty]
+	if !ok {
+		return ErrInvalidToken
 	}
-	tokenId := token["token_id"].(string)
+	tokenType, ok := tokenTypeRaw.(string)
+	if !ok || tokenType != TokenTypeRefresh {
+		return ErrExpireNonRefresh
+	}
+	expAt, err := token[TokenExpProperty].(json.Number).Int64()
+	if err != nil {
+		return ErrInvalidToken
+	}
+	tokenId := token[TokenIdProperty].(string)
 	return ts.storage.Set(tokenId, []byte{0}, time.Unix(expAt, 0).Add(time.Second).Sub(time.Now()))
 }
