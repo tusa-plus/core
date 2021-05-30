@@ -2,13 +2,12 @@ package email
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/tusa-plus/core/utils"
+	"gopkg.in/gomail.v2"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/tusa-plus/core/common"
-	"gopkg.in/gomail.v2"
 )
 
 const (
@@ -29,14 +28,14 @@ type EmailVerification struct {
 	symbols        string
 	storage        fiber.Storage
 	codeExpiration time.Duration
-	rndgen         common.RandomGenerator
-	sender         *CodeSender
+	rndgen         *utils.RandomGenerator
+	sender         CodeSender
 }
 
 func (ev *EmailVerification) SendCode(to string) error {
 	code := ev.rndgen.NextString(codeLen)
 	ev.storage.Set(to, []byte(code), ev.codeExpiration)
-	err := (*ev.sender).SendCode(to, code)
+	err := ev.sender.SendCode(to, code)
 	return err
 }
 
