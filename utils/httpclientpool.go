@@ -13,7 +13,7 @@ func NewHTTPClientPool() HTTPClientPool {
 	return HTTPClientPool{
 		pool: sync.Pool{
 			New: func() interface{} {
-				return &http.Client{}
+				return new(http.Client)
 			},
 		},
 	}

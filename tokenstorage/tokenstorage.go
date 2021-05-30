@@ -96,6 +96,7 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 	parser := jwt.Parser{
 		UseJSONNumber:        true,
 		SkipClaimsValidation: false,
+		ValidMethods:         nil,
 	}
 	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

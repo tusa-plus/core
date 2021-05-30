@@ -63,12 +63,15 @@ linters:
     - stylecheck
     - bodyclose
     - deadcode
+    - durationcheck
+    - exhaustivestruct
+    - exportloopref
+    - forcetypeassert
     - depguard
     - dogsled
     - errcheck
     - exportloopref
     - exhaustive
-    - funlen
     - gochecknoinits
     - goconst
     - gocyclo
@@ -79,6 +82,8 @@ linters:
     - ineffassign
     - lll
     - misspell
+    - prealloc
+    - tparallel
     - nakedret
     - noctx
     - nolintlint
