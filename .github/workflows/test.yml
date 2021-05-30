@@ -37,3 +37,16 @@ jobs:
         uses: golangci/golangci-lint-action@v2.5.2
         with:
           version: latest
+          working-directory: facebook
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2.5.2
+        with:
+          version: latest
+          working-directory: tokenstorage
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2.5.2
+        with:
+          version: latest
+          working-directory: utils
