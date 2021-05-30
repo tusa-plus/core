@@ -2,6 +2,7 @@ package facebook
 
 import (
 	"context"
+	"errors"
 	"github.com/tusa-plus/core/utils"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
@@ -43,7 +44,7 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 		logger:         logger,
 	}
 	_, err = facebook.GetEmail(context.Background(), "xxttzz")
-	if err != ErrValidate {
+	if !errors.Is(err, ErrValidate) {
 		t.Fatalf("expected validation error: %v", err)
 	}
 }
