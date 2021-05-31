@@ -16,14 +16,14 @@ type Google struct {
 }
 
 const (
-	googleUrl = "https://www.googleapis.com/userinfo/v2/me"
+	googleURL = "https://www.googleapis.com/userinfo/v2/me"
 )
 
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
 func (google *Google) GetEmail(ctx context.Context, googleToken string) (string, error) {
-	request, err := http.NewRequest("GET", googleUrl, nil)
+	request, err := http.NewRequest("GET", googleURL, nil)
 	if err != nil {
 		google.logger.Error("unexpected error during creating request",
 			zap.Error(err),
@@ -43,7 +43,7 @@ func (google *Google) GetEmail(ctx context.Context, googleToken string) (string,
 		return "", ErrDoRequest
 	}
 	defer func() {
-		if err := response.Body.Close(); err != nil {
+		if err = response.Body.Close(); err != nil {
 			google.logger.Error("unexpected error during body close",
 				zap.Error(err),
 			)
@@ -56,12 +56,12 @@ func (google *Google) GetEmail(ctx context.Context, googleToken string) (string,
 		)
 		return "", ErrDoRequest
 	}
-	var responseJson map[string]json.RawMessage
-	if err := json.Unmarshal(body, &responseJson); err != nil {
+	var responseJSON map[string]json.RawMessage
+	if err := json.Unmarshal(body, &responseJSON); err != nil {
 		return "", ErrValidate
 	}
 	var email string
-	if err := json.Unmarshal(responseJson["email"], &email); err != nil {
+	if err := json.Unmarshal(responseJSON["email"], &email); err != nil {
 		return "", ErrValidate
 	}
 	return email, nil
