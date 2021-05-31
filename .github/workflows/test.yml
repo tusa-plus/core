@@ -86,3 +86,15 @@ jobs:
           working-directory: utils
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+          
+  lint-google:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: google
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
