@@ -46,7 +46,7 @@ func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error
 		return "", ErrDoRequest
 	}
 	defer func() {
-		if err := response.Body.Close(); err != nil { //nolint:govet
+		if err = response.Body.Close(); err != nil {
 			fb.logger.Error("unexpected error during body close",
 				zap.Error(err),
 			)
