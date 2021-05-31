@@ -1,27 +1,54 @@
 package google
 
 import (
-	"github.com/tusa-plus/core/common"
+	"context"
+	"errors"
+	"github.com/tusa-plus/core/utils"
+	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
 	"testing"
 )
 
-var google = Google{
-	httpClientPool: common.NewHttpClientPool(),
-	tokenType:      "Bearer",
-}
-
-func Test_ManualGoogleGetEmail(t *testing.T) {
+func Test_GoogleGetEmail(t *testing.T) {
+	t.Parallel()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
 	cfg, err := ini.Load("./config_test.ini")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	email, err := google.GetEmail(cfg.Section("google").Key("token").String())
+	pool := utils.NewHTTPClientPool()
+	google := Google{
+		httpClientPool: &pool,
+		logger:         logger,
+	}
+	email, err := google.GetEmail(context.Background(), cfg.Section("google").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	expectedEmail := cfg.Section("google").Key("email").String()
 	if email != expectedEmail {
 		t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
+	}
+}
+
+func Test_GoogleGetEmailInvalidToken(t *testing.T) {
+	t.Parallel()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	pool := utils.NewHTTPClientPool()
+	google := Google{
+		httpClientPool: &pool,
+		logger:         logger,
+	}
+	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
+	for index := range invalidTokens {
+		if _, err = google.GetEmail(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
+			t.Fatalf("expected validation error: %v", err)
+		}
 	}
 }

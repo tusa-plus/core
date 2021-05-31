@@ -1,46 +1,68 @@
 package google
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tusa-plus/core/common"
+	"github.com/tusa-plus/core/utils"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 )
 
 type Google struct {
-	httpClientPool common.HttpClientPool
-	tokenType      string
+	logger         *zap.Logger
+	httpClientPool *utils.HTTPClientPool
 }
 
 const (
 	googleUrl = "https://www.googleapis.com/userinfo/v2/me"
 )
 
-func (google *Google) GetEmail(googleToken string) (string, error) {
+var ErrDoRequest = fmt.Errorf("failed to request")
+var ErrValidate = fmt.Errorf("failed to validate result")
+
+func (google *Google) GetEmail(ctx context.Context, googleToken string) (string, error) {
 	request, err := http.NewRequest("GET", googleUrl, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %v", err)
+		google.logger.Error("unexpected error during creating request",
+			zap.Error(err),
+			zap.String("access_token", googleToken),
+		)
+		return "", ErrDoRequest
 	}
-	request.Header.Add("Authorization", google.tokenType+" "+googleToken)
+	request.Header.Add("Authorization", "Bearer "+googleToken)
 	client := google.httpClientPool.Get()
 	defer google.httpClientPool.Put(client)
-	response, err := client.Do(request)
+	response, err := client.Do(request.WithContext(ctx))
 	if err != nil {
-		return "", fmt.Errorf("can't do request to google: %v", err)
+		google.logger.Error("unexpected error during request",
+			zap.Error(err),
+			zap.String("access_token", googleToken),
+		)
+		return "", ErrDoRequest
 	}
-	defer response.Body.Close()
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			google.logger.Error("unexpected error during body close",
+				zap.Error(err),
+			)
+		}
+	}()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", fmt.Errorf("can't read google response body: %v", err)
+		google.logger.Error("unexpected error during read body",
+			zap.Error(err),
+		)
+		return "", ErrDoRequest
 	}
 	var responseJson map[string]json.RawMessage
 	if err := json.Unmarshal(body, &responseJson); err != nil {
-		return "", fmt.Errorf("can't unmarshal google response body: %v", err)
+		return "", ErrValidate
 	}
 	var email string
 	if err := json.Unmarshal(responseJson["email"], &email); err != nil {
-		return "", fmt.Errorf("can't get email from body: %v %v", string(body), err)
+		return "", ErrValidate
 	}
 	return email, nil
 }
