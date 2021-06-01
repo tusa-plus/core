@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type Vk struct {
@@ -16,14 +17,18 @@ type Vk struct {
 }
 
 const (
-	vkURL = "https://www.googleapis.com/userinfo/v2/me"
+	vkURL = "https://oauth.vk.com/authorize"
 )
 
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
+///todo ничего пока не работает
 func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (string, error) {
-	request, err := http.NewRequest("GET", vkURL, nil)
+	params := url.Values{}
+	params.Add("scope", "email")
+	params.Add("access_token", vkToken)
+	request, err := http.NewRequest("GET", vkURL+params.Encode(), nil)
 	if err != nil {
 		vk.logger.Error("unexpected error during creating request",
 			zap.Error(err),
