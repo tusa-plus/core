@@ -64,6 +64,19 @@ jobs:
           cd email
           go test -v --race
           
+  test-yandexgames:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Test Yandex Games
+        run: |
+          cd yandexgames
+          go test -v --race
+          
   lint-facebook:
     runs-on: ubuntu-latest
     steps:
@@ -121,5 +134,17 @@ jobs:
         with:
           version: v1.40
           working-directory: email
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+  lint-yandexgames:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint Yandex Games
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: yandexgames
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
