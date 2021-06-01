@@ -10,8 +10,8 @@ import (
 var ErrInvalidPortFormat = fmt.Errorf("port format is invalid")
 var ErrSMTPServerFailed = fmt.Errorf("SMTP server couldn't send code")
 
-type CodeFormater interface {
-	FormatCode(email string, code string) string
+func FormatCode(email string, code string) string {
+	return code
 }
 
 type EmailCodeSender struct {
@@ -20,13 +20,13 @@ type EmailCodeSender struct {
 	password   string
 	host       string
 	port       string
-	formatCode CodeFormater
+	formatCode func(string, string) string
 }
 
 func (ecs *EmailCodeSender) SendCode(to string, code string) error {
 	m := gomail.NewMessage()
 
-	body := ecs.formatCode.FormatCode(ecs.sender, code)
+	body := ecs.formatCode(ecs.sender, code)
 	m.SetBody("text/html", body)
 
 	m.SetHeaders(map[string][]string{
