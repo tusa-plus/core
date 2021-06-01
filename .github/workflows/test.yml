@@ -50,12 +50,25 @@ jobs:
         run: |
           cd utils
           go test -v --race
-
+          
+  test-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Test Email
+        run: |
+          cd email
+          go test -v --race
+          
   lint-facebook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: Lint Facebook
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.40
@@ -67,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: Lint TokenStorage
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.40
@@ -79,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: Lint Utils
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.40
@@ -91,10 +104,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: Lint Google
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.40
           working-directory: google
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+  lint-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint Email
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: email
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
