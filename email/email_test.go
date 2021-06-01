@@ -1,7 +1,6 @@
 package email
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -27,7 +26,7 @@ func createEVWithSender() (string, EmailVerification, *ChannelCodeSender) {
 		rndgen:         utils.NewRandomGenerator(validSymbols),
 		sender:         sender,
 	}
-	ConfigSMTPSender := os.Getenv("EMAIL_SENDER")
+	ConfigSMTPSender := "moscow.beverage@gmail.com"
 	return ConfigSMTPSender, ev, sender
 }
 
