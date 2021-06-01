@@ -26,13 +26,13 @@ func createEVWithSender() (string, EmailVerification, *ChannelCodeSender) {
 		rndgen:         utils.NewRandomGenerator(validSymbols),
 		sender:         sender,
 	}
-	ConfigSMTPSender := "moscow.beverage@gmail.com"
-	return ConfigSMTPSender, ev, sender
+	userEmail := "xxxxxxx@gmail.com"
+	return userEmail, ev, sender
 }
 
 func Test_Generate(t *testing.T) {
-	ConfigSMTPSender, ev, sender := createEVWithSender()
-	err := ev.SendCode(ConfigSMTPSender)
+	userEmail, ev, sender := createEVWithSender()
+	err := ev.SendCode(userEmail)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -43,8 +43,8 @@ func Test_Generate(t *testing.T) {
 }
 
 func Test_Verify(t *testing.T) {
-	ConfigSMTPSender, ev, sender := createEVWithSender()
-	err := ev.SendCode(ConfigSMTPSender)
+	userEmail, ev, sender := createEVWithSender()
+	err := ev.SendCode(userEmail)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -52,15 +52,16 @@ func Test_Verify(t *testing.T) {
 	if len(code) != codeLen {
 		t.Fatalf("invalid code len")
 	}
-	err = ev.VerifyCode(code, ConfigSMTPSender)
+	err = ev.VerifyCode(code, userEmail)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func Test_VerifySmallTimeout(t *testing.T) {
-	ConfigSMTPSender, ev, sender := createEVWithSender()
-	err := ev.SendCode(ConfigSMTPSender)
+	userEmail, ev, sender := createEVWithSender()
+	err := ev.SendCode(userEmail)
+	now := time.Now()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -68,16 +69,17 @@ func Test_VerifySmallTimeout(t *testing.T) {
 	if len(code) != codeLen {
 		t.Fatalf("invalid code len")
 	}
-	time.Sleep(smallTime)
-	err = ev.VerifyCode(code, ConfigSMTPSender)
+	time.Sleep(time.Until(now.Add(smallTime)))
+	err = ev.VerifyCode(code, userEmail)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func Test_VerifyBigTimeout(t *testing.T) {
-	ConfigSMTPSender, ev, sender := createEVWithSender()
-	err := ev.SendCode(ConfigSMTPSender)
+	userEmail, ev, sender := createEVWithSender()
+	err := ev.SendCode(userEmail)
+	now := time.Now()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -85,17 +87,17 @@ func Test_VerifyBigTimeout(t *testing.T) {
 	if len(code) != codeLen {
 		t.Fatalf("invalid code len")
 	}
-	time.Sleep(ev.codeExpiration)
-	err = ev.VerifyCode(code, ConfigSMTPSender)
+	time.Sleep(time.Until(now.Add(ev.codeExpiration)))
+	err = ev.VerifyCode(code, userEmail)
 	if err == nil {
 		t.Fatalf("Code wasn't delete")
 	}
 }
 
 func Test_VerifyWithoutSendCode(t *testing.T) {
-	ConfigSMTPSender, ev, _ := createEVWithSender()
+	userEmail, ev, _ := createEVWithSender()
 	code := "Some invalid code"
-	err := ev.VerifyCode(code, ConfigSMTPSender)
+	err := ev.VerifyCode(code, userEmail)
 	if err == nil {
 		t.Fatalf("Code wasn't delete")
 	}
