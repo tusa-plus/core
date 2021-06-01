@@ -1,4 +1,4 @@
-package facebook
+package google
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func Test_FacebookGetEmail(t *testing.T) {
+func Test_GoogleGetEmail(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
@@ -20,34 +20,34 @@ func Test_FacebookGetEmail(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	facebook := Facebook{
+	google := Google{
 		httpClientPool: &pool,
 		logger:         logger,
 	}
-	email, err := facebook.GetEmail(context.Background(), cfg.Section("fb").Key("token").String())
+	email, err := google.GetEmail(context.Background(), cfg.Section("google").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	expectedEmail := cfg.Section("fb").Key("email").String()
+	expectedEmail := cfg.Section("google").Key("email").String()
 	if email != expectedEmail {
 		t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
 	}
 }
 
-func Test_FacebookGetEmailInvalidToken(t *testing.T) {
+func Test_GoogleGetEmailInvalidToken(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	facebook := Facebook{
+	google := Google{
 		httpClientPool: &pool,
 		logger:         logger,
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
-		if _, err = facebook.GetEmail(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
+		if _, err = google.GetEmail(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
 	}

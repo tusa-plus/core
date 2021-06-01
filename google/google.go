@@ -1,4 +1,4 @@
-package facebook
+package google
 
 import (
 	"context"
@@ -8,53 +8,50 @@ import (
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 )
 
-type Facebook struct {
+type Google struct {
 	logger         *zap.Logger
 	httpClientPool *utils.HTTPClientPool
 }
 
 const (
-	fbURL = "https://graph.facebook.com/me?"
+	googleURL = "https://www.googleapis.com/userinfo/v2/me"
 )
 
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error) {
-	params := url.Values{}
-	params.Add("fields", "email")
-	params.Add("access_token", fbToken)
-	request, err := http.NewRequest("GET", fbURL+params.Encode(), nil)
+func (google *Google) GetEmail(ctx context.Context, googleToken string) (string, error) {
+	request, err := http.NewRequest("GET", googleURL, nil)
 	if err != nil {
-		fb.logger.Error("unexpected error during creating request",
+		google.logger.Error("unexpected error during creating request",
 			zap.Error(err),
-			zap.String("access_token", fbToken),
+			zap.String("access_token", googleToken),
 		)
 		return "", ErrDoRequest
 	}
-	client := fb.httpClientPool.Get()
-	defer fb.httpClientPool.Put(client)
+	request.Header.Add("Authorization", "Bearer "+googleToken)
+	client := google.httpClientPool.Get()
+	defer google.httpClientPool.Put(client)
 	response, err := client.Do(request.WithContext(ctx))
 	if err != nil {
-		fb.logger.Error("unexpected error during request",
+		google.logger.Error("unexpected error during request",
 			zap.Error(err),
-			zap.String("access_token", fbToken),
+			zap.String("access_token", googleToken),
 		)
 		return "", ErrDoRequest
 	}
 	defer func() {
 		if err = response.Body.Close(); err != nil {
-			fb.logger.Error("unexpected error during body close",
+			google.logger.Error("unexpected error during body close",
 				zap.Error(err),
 			)
 		}
 	}()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		fb.logger.Error("unexpected error during read body",
+		google.logger.Error("unexpected error during read body",
 			zap.Error(err),
 		)
 		return "", ErrDoRequest

@@ -1,4 +1,4 @@
-package facebook
+package google
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -9,18 +9,18 @@ import (
 	"testing"
 )
 
-func createFacebookApp(t *testing.T) *fiber.App {
+func createGoogleApp(t *testing.T) *fiber.App {
 	app := fiber.New()
 	pool := utils.NewHTTPClientPool()
 	logger, err := zap.NewProduction()
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	facebook := Facebook{
+	google := Google{
 		logger:         logger,
 		httpClientPool: &pool,
 	}
-	app.Use(NewFacebookEmailMiddleware(&facebook))
+	app.Use(NewGoogleEmailMiddleware(&google))
 	return app
 }
 
@@ -30,21 +30,21 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	app := createFacebookApp(t)
+	app := createGoogleApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		email, err := ctx.Context().UserValue("email").(string)
 		if !err {
 			t.Fatalf("unexpected error parsing email")
 		}
-		expectedEmail := cfg.Section("fb").Key("email").String()
+		expectedEmail := cfg.Section("google").Key("email").String()
 		if email != expectedEmail {
 			t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
 		}
 		return ctx.Status(200).SendString("{}")
 	})
-	facebookToken := cfg.Section("fb").Key("token").String()
+	googleToken := cfg.Section("google").Key("token").String()
 	request := httptest.NewRequest("GET", "/", nil)
-	request.Header.Add("Authorization", "Bearer "+facebookToken)
+	request.Header.Add("Authorization", "Bearer "+googleToken)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -56,7 +56,7 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 
 func Test_MiddlewareGetNoToken(t *testing.T) {
 	t.Parallel()
-	app := createFacebookApp(t)
+	app := createGoogleApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})
@@ -72,7 +72,7 @@ func Test_MiddlewareGetNoToken(t *testing.T) {
 
 func Test_MiddlewareGetInvalidToken(t *testing.T) {
 	t.Parallel()
-	app := createFacebookApp(t)
+	app := createGoogleApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.Status(200).SendString("{}")
 	})

@@ -5,24 +5,24 @@ import (
 	"sync"
 )
 
-type HttpClientPool struct {
+type HTTPClientPool struct {
 	pool sync.Pool
 }
 
-func NewHttpClientPool() HttpClientPool {
-	return HttpClientPool{
+func NewHTTPClientPool() HTTPClientPool {
+	return HTTPClientPool{
 		pool: sync.Pool{
 			New: func() interface{} {
-				return &http.Client{}
+				return new(http.Client)
 			},
 		},
 	}
 }
 
-func (httpClientPool *HttpClientPool) Get() *http.Client {
+func (httpClientPool *HTTPClientPool) Get() *http.Client {
 	return httpClientPool.pool.Get().(*http.Client)
 }
 
-func (httpClientPool *HttpClientPool) Put(client *http.Client) {
+func (httpClientPool *HTTPClientPool) Put(client *http.Client) {
 	httpClientPool.pool.Put(client)
 }

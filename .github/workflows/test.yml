@@ -8,7 +8,22 @@ on:
 
 jobs:
 
-  build:
+  test-facebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Test Facebook
+        run: |
+          cd facebook
+          go test -v --race
+
+  test-tokenstorage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,12 +38,63 @@ jobs:
           cd tokenstorage
           go test -v --race
 
+  test-utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
       - name: Test Utils
         run: |
           cd utils
           go test -v --race
 
-      - name: Test Facebook
-        run: |
-          cd facebook
-          go test -v --race
+  lint-facebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: facebook
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+  lint-tokenstorage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: tokenstorage
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+  lint-utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: utils
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+          
+  lint-google:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: google
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'

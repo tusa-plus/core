@@ -1,4 +1,4 @@
-package facebook
+package google
 
 import (
 	"errors"
@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
+func NewGoogleEmailMiddleware(google *Google) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), " ")
 		if len(inputArray) != 2 || inputArray[0] != "Bearer" {
 			return ctx.Status(401).SendString("{}")
 		}
 		tokenString := inputArray[1]
-		email, err := facebook.GetEmail(ctx.Context(), tokenString)
+		email, err := google.GetEmail(ctx.Context(), tokenString)
 		if err != nil {
 			if errors.Is(err, ErrValidate) {
 				return ctx.SendStatus(401)

@@ -1,8 +1,9 @@
 package tokenstorage
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 	"strings"
 )
 
@@ -15,20 +16,26 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 		tokenString := inputArray[1]
 		token, err := ts.ParseToken(tokenString)
 		if err != nil {
-			switch err {
-			case ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature:
-				return ctx.SendStatus(401)
-			default:
-				fmt.Printf("%v\b", err)
-				return ctx.SendStatus(500)
+			validationErrors := []error{ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature, ErrInvalidFields}
+			for index := range validationErrors {
+				if errors.Is(err, validationErrors[index]) {
+					return ctx.SendStatus(401)
+				}
 			}
+			return ctx.SendStatus(500)
 		}
 		tokenTypeRaw, ok := token[TokenTypeProperty]
 		if !ok {
+			ts.logger.Warn("token doesn't contain token_type",
+				zap.String("token_string", tokenString),
+			)
 			return ctx.SendStatus(401)
 		}
 		tokenType, ok := tokenTypeRaw.(string)
 		if !ok || tokenType != expectedTokenType {
+			ts.logger.Warn("token_type is not string",
+				zap.String("token_string", tokenString),
+			)
 			return ctx.SendStatus(401)
 		}
 		ctx.Context().SetUserValue("token_data", token)
