@@ -11,7 +11,7 @@ func NewYandexGamesMiddleware(yandexGames *YandexGames) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), ".")
 		if len(inputArray) != 2 {
-			return ctx.Status(401).SendString("{}")
+			return ctx.SendStatus(401)
 		}
 		err := yandexGames.ValidateSignature(inputArray[0], inputArray[1])
 		if err != nil {
