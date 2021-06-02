@@ -16,6 +16,25 @@ type Facebook struct {
 	httpClientPool *utils.HTTPClientPool
 }
 
+func NewFacebook(logger *zap.Logger, pool *utils.HTTPClientPool) (*Facebook, error) {
+	if logger == nil {
+		var err error
+		logger, err = zap.NewProduction()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create zap logger: %w", err)
+		}
+	}
+	if pool == nil {
+		newPool := utils.NewHTTPClientPool()
+		pool = &newPool
+	}
+	facebook := &Facebook{
+		logger:         logger,
+		httpClientPool: pool,
+	}
+	return facebook, nil
+}
+
 const (
 	fbURL = "https://graph.facebook.com/me?"
 )
