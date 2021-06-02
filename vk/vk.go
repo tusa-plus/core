@@ -25,11 +25,9 @@ var ErrValidate = fmt.Errorf("failed to validate result")
 
 ///todo ничего пока не работает
 func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (uint64, error) {
-	println("token = " + vkToken)
 	params := url.Values{}
 	params.Add("access_token", vkToken)
 	params.Add("v", "5.131")
-	println(vkURL + params.Encode())
 	request, err := http.NewRequest("GET", vkURL+params.Encode(), nil)
 	if err != nil {
 		vk.logger.Error("unexpected error during creating request",
