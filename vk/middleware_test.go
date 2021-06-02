@@ -32,19 +32,19 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	}
 	app := createVkApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		email, err := ctx.Context().UserValue("email").(string)
+		id, err := ctx.Context().UserValue("id").(string)
 		if !err {
 			t.Fatalf("unexpected error parsing email")
 		}
-		expectedEmail := cfg.Section("vk").Key("email").String()
-		if email != expectedEmail {
-			t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
+		expectedID := cfg.Section("vk").Key("id").String()
+		if id != expectedID {
+			t.Fatalf("invalid ID: expected %v, got %v", expectedID, id)
 		}
 		return ctx.Status(200).SendString("{}")
 	})
 	vkToken := cfg.Section("vk").Key("token").String()
 	request := httptest.NewRequest("GET", "/", nil)
-	request.Header.Add("Authorization", "Bearer "+vkToken)
+	request.Header.Add("access_token", vkToken)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)

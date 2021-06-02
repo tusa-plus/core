@@ -28,7 +28,7 @@ func Test_VkGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	expectedEmail := cfg.Section("vk").Key("email").String()
+	expectedEmail, _ := cfg.Section("vk").Key("id").Uint64()
 	if email != expectedEmail {
 		t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
 	}

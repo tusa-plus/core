@@ -17,26 +17,27 @@ type Vk struct {
 }
 
 const (
-	vkURL = "https://oauth.vk.com/authorize"
+	vkURL = "https://api.vk.com/method/users.get?"
 )
 
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
 ///todo ничего пока не работает
-func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (string, error) {
+func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (uint64, error) {
+	println("token = " + vkToken)
 	params := url.Values{}
-	params.Add("scope", "email")
 	params.Add("access_token", vkToken)
+	params.Add("v", "5.131")
+	println(vkURL + params.Encode())
 	request, err := http.NewRequest("GET", vkURL+params.Encode(), nil)
 	if err != nil {
 		vk.logger.Error("unexpected error during creating request",
 			zap.Error(err),
 			zap.String("access_token", vkToken),
 		)
-		return "", ErrDoRequest
+		return 0, ErrDoRequest
 	}
-	request.Header.Add("Authorization", "Bearer "+vkToken)
 	client := vk.httpClientPool.Get()
 	defer vk.httpClientPool.Put(client)
 	response, err := client.Do(request.WithContext(ctx))
@@ -45,7 +46,7 @@ func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (string, error) {
 			zap.Error(err),
 			zap.String("access_token", vkToken),
 		)
-		return "", ErrDoRequest
+		return 0, ErrDoRequest
 	}
 	defer func() {
 		if err = response.Body.Close(); err != nil {
@@ -59,15 +60,23 @@ func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (string, error) {
 		vk.logger.Error("unexpected error during read body",
 			zap.Error(err),
 		)
-		return "", ErrDoRequest
+		return 0, ErrDoRequest
 	}
 	var responseJSON map[string]json.RawMessage
 	if err := json.Unmarshal(body, &responseJSON); err != nil {
-		return "", ErrValidate
+		return 0, ErrValidate
 	}
-	var email string
-	if err := json.Unmarshal(responseJSON["email"], &email); err != nil {
-		return "", ErrValidate
+	var answer []json.RawMessage
+	if err := json.Unmarshal(responseJSON["response"], &answer); err != nil {
+		return 0, ErrValidate
 	}
-	return email, nil
+	var profileInfo map[string]json.RawMessage
+	if err := json.Unmarshal(answer[0], &profileInfo); err != nil {
+		return 0, ErrValidate
+	}
+	var id uint64
+	if err := json.Unmarshal(profileInfo["id"], &id); err != nil {
+		return 0, ErrValidate
+	}
+	return id, nil
 }
