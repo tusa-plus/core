@@ -1,6 +1,7 @@
 package vk
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/tusa-plus/core/utils"
 	"go.uber.org/zap"
@@ -32,19 +33,19 @@ func Test_MiddlewareGetValidEmail(t *testing.T) {
 	}
 	app := createVkApp(t)
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		id, err := ctx.Context().UserValue("id").(string)
+		id, err := ctx.Context().UserValue("id").(uint64)
 		if !err {
-			t.Fatalf("unexpected error parsing email")
+			t.Fatalf("unexpected error parsing id")
 		}
 		expectedID := cfg.Section("vk").Key("id").String()
-		if id != expectedID {
+		if fmt.Sprint(id) != expectedID {
 			t.Fatalf("invalid ID: expected %v, got %v", expectedID, id)
 		}
 		return ctx.Status(200).SendString("{}")
 	})
 	vkToken := cfg.Section("vk").Key("token").String()
 	request := httptest.NewRequest("GET", "/", nil)
-	request.Header.Add("access_token", vkToken)
+	request.Header.Add("Authorization", "access_token "+vkToken)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -77,7 +78,7 @@ func Test_MiddlewareGetInvalidToken(t *testing.T) {
 		return ctx.Status(200).SendString("{}")
 	})
 	request := httptest.NewRequest("GET", "/", nil)
-	request.Header.Add("Authorization", "Bearer 1234324234")
+	request.Header.Add("Authorization", "access_token 1234324234")
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)

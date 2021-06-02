@@ -24,7 +24,7 @@ func Test_VkGetEmail(t *testing.T) {
 		httpClientPool: &pool,
 		logger:         logger,
 	}
-	email, err := vk.GetEmail(context.Background(), cfg.Section("vk").Key("token").String())
+	email, err := vk.GetID(context.Background(), cfg.Section("vk").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -47,7 +47,7 @@ func Test_VkGetEmailInvalidToken(t *testing.T) {
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
-		if _, err = vk.GetEmail(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
+		if _, err = vk.GetID(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
 	}

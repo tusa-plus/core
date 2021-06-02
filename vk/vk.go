@@ -24,7 +24,7 @@ var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
 ///todo ничего пока не работает
-func (vk *Vk) GetEmail(ctx context.Context, vkToken string) (uint64, error) {
+func (vk *Vk) GetID(ctx context.Context, vkToken string) (uint64, error) {
 	params := url.Values{}
 	params.Add("access_token", vkToken)
 	params.Add("v", "5.131")
