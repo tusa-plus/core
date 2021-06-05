@@ -14,7 +14,7 @@ func NewGoogleEmailMiddleware(google *Google) fiber.Handler {
 		type EmptyResponse struct{}
 		var request LoginWithGoogleRequest
 		if err := ctx.BodyParser(&request); err != nil {
-			return ctx.Status(401).JSON(EmptyResponse{})
+			return ctx.Status(400).JSON(EmptyResponse{})
 		}
 		email, err := google.GetEmail(ctx.Context(), request.Token)
 		if err != nil {

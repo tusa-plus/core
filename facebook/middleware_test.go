@@ -113,7 +113,7 @@ func Test_MiddlewareGetNoToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	if response.StatusCode != 401 {
+	if response.StatusCode != 400 {
 		t.Fatalf("unexpected status code %v", response.StatusCode)
 	}
 }
