@@ -49,6 +49,30 @@ func Test_TokenStorage_NewTokenPair(t *testing.T) {
 	}
 }
 
+func Test_TokenStorage_NewTokenPairRebuildsId(t *testing.T) {
+	t.Parallel()
+	ts, _ := createTSWithTestData(t)
+	access, _, err := ts.NewTokenPair(map[string]interface{}{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	tokenData, err := ts.ParseToken(access)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	newAccess, _, err := ts.NewTokenPair(tokenData)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	newTokenData, err := ts.ParseToken(newAccess)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if newTokenData[tokenIDProperty] == tokenData[tokenIDProperty] {
+		t.Fatalf("id should be different")
+	}
+}
+
 func Test_TokenStorage_ParseTokenCorrect(t *testing.T) {
 	t.Parallel()
 	ts, data := createTSWithTestData(t)
