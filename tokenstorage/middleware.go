@@ -22,6 +22,10 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 					return ctx.Status(401).SendString("{}")
 				}
 			}
+			ts.logger.Error("unknown error parsing token",
+				zap.String("token_string", tokenString),
+				zap.Error(err),
+			)
 			return ctx.Status(500).SendString("{}")
 		}
 		tokenTypeRaw, ok := token[TokenTypeProperty]
