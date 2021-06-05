@@ -9,6 +9,27 @@ import (
 	"testing"
 )
 
+func Test_NewGoogleEmptyLogger(t *testing.T) {
+	t.Parallel()
+	pool := utils.NewHTTPClientPool()
+	_, err := NewGoogle(nil, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+}
+
+func Test_NewGoogleEmptyPool(t *testing.T) {
+	t.Parallel()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	_, err = NewGoogle(logger, nil)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+}
+
 func Test_GoogleGetEmail(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
@@ -20,9 +41,9 @@ func Test_GoogleGetEmail(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	google := Google{
-		httpClientPool: &pool,
-		logger:         logger,
+	google, err := NewGoogle(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 	email, err := google.GetEmail(context.Background(), cfg.Section("google").Key("token").String())
 	if err != nil {
@@ -41,9 +62,9 @@ func Test_GoogleGetEmailInvalidToken(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	google := Google{
-		httpClientPool: &pool,
-		logger:         logger,
+	google, err := NewGoogle(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {

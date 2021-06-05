@@ -15,6 +15,25 @@ type Google struct {
 	httpClientPool *utils.HTTPClientPool
 }
 
+func NewGoogle(logger *zap.Logger, pool *utils.HTTPClientPool) (*Google, error) {
+	if logger == nil {
+		var err error
+		logger, err = zap.NewProduction()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create zap logger: %w", err)
+		}
+	}
+	if pool == nil {
+		newPool := utils.NewHTTPClientPool()
+		pool = &newPool
+	}
+	google := &Google{
+		logger:         logger,
+		httpClientPool: pool,
+	}
+	return google, nil
+}
+
 const (
 	googleURL = "https://www.googleapis.com/userinfo/v2/me"
 )

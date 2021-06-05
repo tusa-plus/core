@@ -9,6 +9,27 @@ import (
 	"testing"
 )
 
+func Test_NewFacebookEmptyLogger(t *testing.T) {
+	t.Parallel()
+	pool := utils.NewHTTPClientPool()
+	_, err := NewFacebook(nil, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+}
+
+func Test_NewFacebookEmptyPool(t *testing.T) {
+	t.Parallel()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	_, err = NewFacebook(logger, nil)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+}
+
 func Test_FacebookGetEmail(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
@@ -20,9 +41,9 @@ func Test_FacebookGetEmail(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	facebook := Facebook{
-		httpClientPool: &pool,
-		logger:         logger,
+	facebook, err := NewFacebook(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
 	email, err := facebook.GetEmail(context.Background(), cfg.Section("fb").Key("token").String())
 	if err != nil {
@@ -41,9 +62,9 @@ func Test_FacebookGetEmailInvalidToken(t *testing.T) {
 		t.Fatalf("unexpected error %v", err)
 	}
 	pool := utils.NewHTTPClientPool()
-	facebook := Facebook{
-		httpClientPool: &pool,
-		logger:         logger,
+	facebook, err := NewFacebook(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
