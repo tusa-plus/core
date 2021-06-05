@@ -23,7 +23,7 @@ func createFacebookApp(t *testing.T) *fiber.App {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	app.Use(NewFacebookEmailMiddleware(&facebook))
+	app.Use(NewFacebookEmailMiddleware(facebook))
 	return app
 }
 
