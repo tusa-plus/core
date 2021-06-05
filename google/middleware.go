@@ -3,22 +3,25 @@ package google
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
-	"strings"
 )
+
+type LoginWithGoogleRequest struct {
+	Token string `json:"token"`
+}
 
 func NewGoogleEmailMiddleware(google *Google) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), " ")
-		if len(inputArray) != 2 || inputArray[0] != "Bearer" {
-			return ctx.Status(401).SendString("{}")
+		type EmptyResponse struct{}
+		var request LoginWithGoogleRequest
+		if err := ctx.BodyParser(&request); err != nil {
+			return ctx.Status(401).JSON(EmptyResponse{})
 		}
-		tokenString := inputArray[1]
-		email, err := google.GetEmail(ctx.Context(), tokenString)
+		email, err := google.GetEmail(ctx.Context(), request.Token)
 		if err != nil {
 			if errors.Is(err, ErrValidate) {
-				return ctx.SendStatus(401)
+				return ctx.Status(401).SendString("{}")
 			} else {
-				return ctx.SendStatus(500)
+				return ctx.Status(500).SendString("{}")
 			}
 		}
 		ctx.Context().SetUserValue("email", email)

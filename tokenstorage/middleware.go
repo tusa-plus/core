@@ -19,24 +19,24 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 			validationErrors := []error{ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature, ErrInvalidFields}
 			for index := range validationErrors {
 				if errors.Is(err, validationErrors[index]) {
-					return ctx.SendStatus(401)
+					return ctx.Status(401).SendString("{}")
 				}
 			}
-			return ctx.SendStatus(500)
+			return ctx.Status(500).SendString("{}")
 		}
 		tokenTypeRaw, ok := token[TokenTypeProperty]
 		if !ok {
 			ts.logger.Warn("token doesn't contain token_type",
 				zap.String("token_string", tokenString),
 			)
-			return ctx.SendStatus(401)
+			return ctx.Status(401).SendString("{}")
 		}
 		tokenType, ok := tokenTypeRaw.(string)
 		if !ok || tokenType != expectedTokenType {
 			ts.logger.Warn("token_type is not string",
 				zap.String("token_string", tokenString),
 			)
-			return ctx.SendStatus(401)
+			return ctx.Status(401).SendString("{}")
 		}
 		ctx.Context().SetUserValue("token_data", token)
 		return ctx.Next()

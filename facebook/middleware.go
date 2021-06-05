@@ -3,22 +3,25 @@ package facebook
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
-	"strings"
 )
+
+type LoginWithFacebookRequest struct {
+	Token string `json:"token" xml:"token"`
+}
 
 func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), " ")
-		if len(inputArray) != 2 || inputArray[0] != "Bearer" {
-			return ctx.Status(401).SendString("{}")
+		type EmptyResponse struct{}
+		var request LoginWithFacebookRequest
+		if err := ctx.BodyParser(&request); err != nil {
+			return ctx.Status(401).JSON(EmptyResponse{})
 		}
-		tokenString := inputArray[1]
-		email, err := facebook.GetEmail(ctx.Context(), tokenString)
+		email, err := facebook.GetEmail(ctx.Context(), request.Token)
 		if err != nil {
 			if errors.Is(err, ErrValidate) {
-				return ctx.SendStatus(401)
+				return ctx.Status(401).JSON(EmptyResponse{})
 			} else {
-				return ctx.SendStatus(500)
+				return ctx.Status(500).JSON(EmptyResponse{})
 			}
 		}
 		ctx.Context().SetUserValue("email", email)
