@@ -6,7 +6,7 @@ import (
 )
 
 type LoginWithGoogleRequest struct {
-	Token string `json:"token" xml:"token" form: "token"`
+	Token string `json:"token" xml:"token" form:"token"`
 }
 
 func NewGoogleEmailMiddleware(google Google) fiber.Handler {
