@@ -4,16 +4,11 @@ import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
-	"strings"
 )
 
 func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		inputArray := strings.Split(ctx.Get(fiber.HeaderAuthorization, ""), " ")
-		if len(inputArray) != 2 || inputArray[0] != "Bearer" {
-			return ctx.Status(401).SendString("{}")
-		}
-		tokenString := inputArray[1]
+		tokenString := ctx.Get(fiber.HeaderAuthorization, "")
 		token, err := ts.ParseToken(tokenString)
 		if err != nil {
 			validationErrors := []error{ErrTokenExpired, ErrInvalidToken, ErrInvalidSignature, ErrInvalidFields}

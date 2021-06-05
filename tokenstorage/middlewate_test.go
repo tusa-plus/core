@@ -47,7 +47,7 @@ func Test_MiddlewareTestAccessToken(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	request := httptest.NewRequest("GET", "/access", nil)
-	request.Header.Add("Authorization", "Bearer "+access)
+	request.Header.Add("Authorization", access)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -80,7 +80,7 @@ func Test_MiddlewareTestRefreshToken(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	request := httptest.NewRequest("GET", "/refresh", nil)
-	request.Header.Add("Authorization", "Bearer "+refresh)
+	request.Header.Add("Authorization", refresh)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -117,7 +117,7 @@ func Test_MiddlewareTestExpired(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	request := httptest.NewRequest("GET", "/refresh", nil)
-	request.Header.Add("Authorization", "Bearer "+refresh)
+	request.Header.Add("Authorization", refresh)
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -146,7 +146,7 @@ func Test_MiddlewareTestInvalidToken(t *testing.T) {
 		return ctx.SendStatus(200)
 	})
 	request := httptest.NewRequest("GET", "/access", nil)
-	request.Header.Add("Authorization", "Bearer 12321312321")
+	request.Header.Add("Authorization", "12321312321")
 	response, err := app.Test(request, 2000)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
