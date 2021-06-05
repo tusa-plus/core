@@ -19,9 +19,9 @@ func createFacebookApp(t *testing.T) *fiber.App {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	facebook := Facebook{
-		logger:         logger,
-		httpClientPool: &pool,
+	facebook, err := NewFacebook(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
 	app.Use(NewFacebookEmailMiddleware(&facebook))
 	return app
