@@ -37,6 +37,7 @@ func (writer *ResponseWriter) Write(data interface{}) error {
 	case fiber.MIMEApplicationXML:
 		result, err := xml.Marshal(data)
 		if err != nil {
+			writer.logger.Error("failed to create xml", zap.Error(err))
 			return writer.ctx.Status(500).Send(writer.responseFail)
 		}
 		writer.ctx.Context().Response.Header.Add("Content-Type", fiber.MIMEApplicationXML)
