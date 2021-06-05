@@ -61,13 +61,11 @@ func NewTokenStorage(
 }
 
 func (ts *TokenStorage) NewTokenPair(data map[string]interface{}) (string, string, error) {
-	tokenID := uuid.NewV4().String()
-	claims := jwt.MapClaims{
-		tokenIDProperty: tokenID,
-	}
+	claims := jwt.MapClaims{}
 	for key, value := range data {
 		claims[key] = value
 	}
+	claims[tokenIDProperty] = uuid.NewV4().String()
 	// create access token
 	claims[TokenExpProperty] = time.Now().Add(ts.accessExpiration).Unix()
 	claims[TokenTypeProperty] = TokenTypeAccess
