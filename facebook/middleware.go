@@ -6,7 +6,7 @@ import (
 )
 
 type LoginWithFacebookRequest struct {
-	Token string `json:"token" xml:"token"`
+	Token string `json:"token" xml:"token" form: "token"`
 }
 
 func NewFacebookEmailMiddleware(facebook Facebook) fiber.Handler {
@@ -14,7 +14,7 @@ func NewFacebookEmailMiddleware(facebook Facebook) fiber.Handler {
 		type EmptyResponse struct{}
 		var request LoginWithFacebookRequest
 		if err := ctx.BodyParser(&request); err != nil {
-			return ctx.Status(400).JSON(EmptyResponse{})
+			return ctx.Status(422).JSON(EmptyResponse{})
 		}
 		email, err := facebook.GetEmail(ctx.Context(), request.Token)
 		if err != nil {
