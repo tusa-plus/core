@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/xml"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )
@@ -10,6 +11,20 @@ type ResponseWriter struct {
 	ctx          *fiber.Ctx
 	logger       *zap.Logger
 	responseFail []byte
+}
+
+func NewResponseWriter(ctx *fiber.Ctx, logger *zap.Logger, responseFail []byte) (*ResponseWriter, error) {
+	if ctx == nil {
+		return nil, fmt.Errorf("failed to create response writer, ctx must not be nil")
+	}
+	if logger == nil {
+		return nil, fmt.Errorf("failed to create response writer, ctx must not be nil")
+	}
+	return &ResponseWriter{
+		ctx:          ctx,
+		logger:       logger,
+		responseFail: responseFail,
+	}, nil
 }
 
 func (writer *ResponseWriter) Write(data interface{}) error {
