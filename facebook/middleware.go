@@ -9,7 +9,7 @@ type LoginWithFacebookRequest struct {
 	Token string `json:"token" xml:"token"`
 }
 
-func NewFacebookEmailMiddleware(facebook *Facebook) fiber.Handler {
+func NewFacebookEmailMiddleware(facebook Facebook) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		type EmptyResponse struct{}
 		var request LoginWithFacebookRequest
