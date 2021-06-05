@@ -28,7 +28,7 @@ func NewResponseWriter(ctx *fiber.Ctx, logger *zap.Logger, responseFail []byte) 
 }
 
 func (writer *ResponseWriter) Status(status int) *ResponseWriter {
-	writer.Status(status)
+	writer.ctx.Status(status)
 	return writer
 }
 
