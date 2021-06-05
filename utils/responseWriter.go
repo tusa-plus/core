@@ -27,6 +27,11 @@ func NewResponseWriter(ctx *fiber.Ctx, logger *zap.Logger, responseFail []byte) 
 	}, nil
 }
 
+func (writer *ResponseWriter) Status(status int) *ResponseWriter {
+	writer.Status(status)
+	return writer
+}
+
 func (writer *ResponseWriter) Write(data interface{}) error {
 	switch writer.ctx.Get("accept", fiber.MIMEApplicationJSON) {
 	case fiber.MIMEApplicationXML:
