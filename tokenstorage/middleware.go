@@ -38,6 +38,7 @@ func NewCheckTokenMiddleware(ts *TokenStorage, expectedTokenType string) fiber.H
 			)
 			return ctx.Status(401).SendString("{}")
 		}
+		ctx.Context().SetUserValue("token_string", tokenString)
 		ctx.Context().SetUserValue("token_data", token)
 		return ctx.Next()
 	}
