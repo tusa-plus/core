@@ -6,7 +6,7 @@ import (
 )
 
 type LoginWithFacebookRequest struct {
-	Token string `json:"token" xml:"token" form: "token"`
+	Token string `json:"token" xml:"token" form:"token"`
 }
 
 func NewFacebookEmailMiddleware(facebook Facebook) fiber.Handler {
