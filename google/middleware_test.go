@@ -19,11 +19,11 @@ func createGoogleApp(t *testing.T) *fiber.App {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	google := Google{
-		logger:         logger,
-		httpClientPool: &pool,
+	google, err := NewGoogle(logger, &pool)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
 	}
-	app.Use(NewGoogleEmailMiddleware(&google))
+	app.Use(NewGoogleEmailMiddleware(google))
 	return app
 }
 

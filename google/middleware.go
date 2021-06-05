@@ -9,7 +9,7 @@ type LoginWithGoogleRequest struct {
 	Token string `json:"token" xml:"token"`
 }
 
-func NewGoogleEmailMiddleware(google *Google) fiber.Handler {
+func NewGoogleEmailMiddleware(google Google) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		type EmptyResponse struct{}
 		var request LoginWithGoogleRequest
