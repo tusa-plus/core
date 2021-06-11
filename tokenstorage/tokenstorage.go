@@ -124,16 +124,9 @@ func (ts *TokenStorage) ParseToken(tokenString string) (map[string]interface{}, 
 	if !ok || !token.Valid || claims.Valid() != nil {
 		return nil, ErrInvalidToken
 	}
-	tokenIDRaw, ok := claims[tokenIDProperty]
+	tokenID, ok := claims[tokenIDProperty].(string)
 	if !ok {
-		ts.logger.Warn("token doesn't contain token_id",
-			zap.String("token_string", tokenString),
-		)
-		return nil, ErrInvalidFields
-	}
-	tokenID, ok := tokenIDRaw.(string)
-	if !ok {
-		ts.logger.Warn("token_id is not string",
+		ts.logger.Warn("bad token_id",
 			zap.String("token_string", tokenString),
 		)
 		return nil, ErrInvalidFields
@@ -158,15 +151,7 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	if err != nil {
 		return err
 	}
-	tokenTypeRaw, ok := token[TokenTypeProperty]
-	if !ok {
-		ts.logger.Error("token doesn't contain token_type",
-			zap.Error(err),
-			zap.String("token_string", tokenString),
-		)
-		return ErrInvalidFields
-	}
-	tokenType, ok := tokenTypeRaw.(string)
+	tokenType, ok := token[TokenTypeProperty].(string)
 	if !ok {
 		ts.logger.Warn("token_type is not string",
 			zap.String("token_string", tokenString),
@@ -176,27 +161,20 @@ func (ts *TokenStorage) ExpireToken(tokenString string) error {
 	if tokenType != TokenTypeRefresh {
 		return ErrExpireNonRefresh
 	}
-	expAtRaw, ok := token[TokenExpProperty]
+	expAtRaw, ok := token[TokenExpProperty].(json.Number)
 	if !ok {
-		ts.logger.Warn("token doesn't contain exp",
+		ts.logger.Warn("bad exp in token",
 			zap.String("token_string", tokenString),
 		)
 		return ErrInvalidFields
 	}
-	expAt, err := expAtRaw.(json.Number).Int64()
+	expAt, err := expAtRaw.Int64()
 	if err != nil {
 		return ErrInvalidFields
 	}
-	tokenIDRaw, ok := token[tokenIDProperty]
+	tokenID, ok := token[tokenIDProperty].(string)
 	if !ok {
-		ts.logger.Warn("token doesn't contain token_id",
-			zap.String("token_string", tokenString),
-		)
-		return ErrInvalidFields
-	}
-	tokenID, ok := tokenIDRaw.(string)
-	if !ok {
-		ts.logger.Warn("token_id is not string",
+		ts.logger.Warn("bad token_id in token",
 			zap.String("token_string", tokenString),
 		)
 		return ErrInvalidFields
