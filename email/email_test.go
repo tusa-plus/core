@@ -16,7 +16,7 @@ func Test_Generate(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	code := <-(sender.Channel)
-	if len(code) != codeLen {
+	if len(code) != codeLenMock {
 		t.Fatalf("invalid code len")
 	}
 }
@@ -28,7 +28,7 @@ func Test_Verify(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	code := <-(sender.Channel)
-	if len(code) != codeLen {
+	if len(code) != codeLenMock {
 		t.Fatalf("invalid code len")
 	}
 	err = ev.VerifyCode(code, userEmail)
@@ -45,7 +45,7 @@ func Test_VerifySmallTimeout(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	code := <-(sender.Channel)
-	if len(code) != codeLen {
+	if len(code) != codeLenMock {
 		t.Fatalf("invalid code len")
 	}
 	time.Sleep(time.Until(now.Add(smallTime)))
@@ -63,7 +63,7 @@ func Test_VerifyBigTimeout(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	code := <-(sender.Channel)
-	if len(code) != codeLen {
+	if len(code) != codeLenMock {
 		t.Fatalf("invalid code len")
 	}
 	time.Sleep(time.Until(now.Add(ev.codeExpiration)))

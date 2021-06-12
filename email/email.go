@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/storage/memory"
 	"github.com/tusa-plus/core/utils"
 )
 
@@ -25,7 +26,6 @@ type EmailVerification struct {
 }
 
 func (ev *EmailVerification) SendCode(to string) error {
-	ev.rndgen = utils.NewRandomGenerator(ev.symbols)
 	code := ev.rndgen.NextString(ev.codeLen)
 	err := ev.storage.Set(to, []byte(code), ev.codeExpiration)
 	if err != nil {
@@ -47,4 +47,38 @@ func (ev *EmailVerification) VerifyCode(code string, email string) error {
 		return ErrInvalidCode
 	}
 	return nil
+}
+
+const (
+	validSymbolsMock = "0123456789"
+	codeLenMock      = 6
+)
+
+func NewMockEmailVerification() (string, EmailVerification, *ChannelCodeSender) {
+	codeSender := ChannelCodeSender{
+		Channel: make(chan string, codeLenMock),
+	}
+	ev := EmailVerification{
+		symbols:        validSymbolsMock,
+		codeLen:        codeLenMock,
+		storage:        memory.New(),
+		codeExpiration: time.Second * 2,
+		rndgen:         utils.NewRandomGenerator(validSymbolsMock),
+		sender:         &codeSender,
+	}
+	userEmail := "xxxxxxx@gmail.com"
+	return userEmail, ev, &codeSender
+}
+
+func NewEmailVerification(sender, login, password, host, port, validCodeSymbols string, codeLen int, codeExpiration time.Duration) EmailVerification {
+	codeSender := NewEmailCodeSender(sender, login, password, host, port)
+	ev := EmailVerification{
+		symbols:        validCodeSymbols,
+		codeLen:        codeLen,
+		storage:        memory.New(),
+		codeExpiration: codeExpiration,
+		rndgen:         utils.NewRandomGenerator(validCodeSymbols),
+		sender:         &codeSender,
+	}
+	return ev
 }

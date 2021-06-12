@@ -45,3 +45,14 @@ func (ecs *EmailCodeSender) SendCode(to string, code string) error {
 	}
 	return nil
 }
+
+func NewEmailCodeSender(sender, login, password, host, port string) EmailCodeSender {
+	return EmailCodeSender{
+		sender:     sender,
+		login:      login,
+		password:   password,
+		host:       host,
+		port:       port,
+		formatCode: FormatCode,
+	}
+}
