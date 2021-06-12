@@ -70,7 +70,8 @@ func NewMockEmailVerification() (string, EmailVerification, *ChannelCodeSender) 
 	return userEmail, ev, &codeSender
 }
 
-func NewEmailVerification(sender, login, password, host, port, validCodeSymbols string, codeLen int, codeExpiration time.Duration) EmailVerification {
+func NewEmailVerification(codeLen int, codeExpiration time.Duration,
+	sender, login, password, host, port, validCodeSymbols string) EmailVerification {
 	codeSender := NewEmailCodeSender(sender, login, password, host, port)
 	ev := EmailVerification{
 		symbols:        validCodeSymbols,
