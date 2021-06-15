@@ -1,24 +1,24 @@
 package validators
 
 import (
+	"context"
 	"fmt"
-	"regexp"
+
+	"github.com/smancke/mailck"
 )
 
-const regexr = "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@" +
-	"[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
-const maxEmailLen = 245
+const fromEmail = "moscow.beverage@gmail.com"
 
 var ErrLongEmailLen = fmt.Errorf("length of email is too long")
 var ErrInvalidEmailFormat = fmt.Errorf("invalid email format")
 
-func ValidateEmail(email string) error {
-	var rxEmail = regexp.MustCompile(regexr)
-	if len(email) > maxEmailLen {
-		return ErrLongEmailLen
+func ValidateEmail(ctx context.Context, email string) error {
+	result, err := mailck.CheckWithContext(ctx, fromEmail, email)
+	if err != nil {
+		return err
 	}
-	if !rxEmail.MatchString(email) {
-		return ErrInvalidEmailFormat
+	if !result.IsValid() {
+		return fmt.Errorf(result.Message)
 	}
 	return nil
 }

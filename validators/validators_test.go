@@ -1,34 +1,40 @@
 package validators
 
 import (
+	"context"
 	"testing"
+	"time"
 )
 
 func Test_ValidateEmailOk(t *testing.T) {
 	t.Parallel()
+	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
 	email := "example@mail.ru"
-	err := ValidateEmail(email)
+	err := ValidateEmail(ctx, email)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	cancel()
 }
 
 func Test_ValidateEmailFail(t *testing.T) {
 	t.Parallel()
 	email := "examplefail@mail.ru"
-	longEmail := make([]byte, 0, maxEmailLen+1)
+	longEmail := make([]byte, 0, 256)
 	for _, symb := range email {
 		longEmail = append(longEmail, byte(symb))
 	}
-	for len(longEmail) <= maxEmailLen {
+	for len(longEmail) <= 256 {
 		longEmail = append(longEmail, 'u')
 	}
 	emails := []string{"aa", "examplemail.ru", "example@", "@", "@example", string(longEmail)}
 	for _, email := range emails {
-		err := ValidateEmail(email)
+		ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
+		err := ValidateEmail(ctx, email)
 		if err == nil {
 			t.Fatalf("Email passes validation, but it is incorrect\nemail: %v", email)
 		}
+		cancel()
 	}
 }
 
