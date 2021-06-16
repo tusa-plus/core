@@ -49,6 +49,10 @@ func (ev *EmailVerification) VerifyCode(code string, email string) error {
 	return nil
 }
 
+func (ev *EmailVerification) DeleteCode(email string) error {
+	return ev.storage.Delete(email)
+}
+
 const (
 	validSymbolsMock = "0123456789"
 	codeLenMock      = 6
