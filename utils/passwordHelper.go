@@ -10,3 +10,7 @@ func (ph *PasswordHelper) HashPassword(password string, user string) [32]byte {
 	hash := sha256.Sum256([]byte(ph.salt + password + user))
 	return hash
 }
+
+func NewPasswordHelper(salt string) PasswordHelper {
+	return PasswordHelper{salt: salt}
+}
