@@ -53,6 +53,10 @@ func (ev *EmailVerification) DeleteCode(email string) error {
 	return ev.storage.Delete(email)
 }
 
+func (ev *EmailVerification) GetCodeExpiration() time.Duration {
+	return ev.codeExpiration
+}
+
 const (
 	validSymbolsMock = "0123456789"
 	codeLenMock      = 6
