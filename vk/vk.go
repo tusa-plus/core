@@ -1,80 +1,50 @@
 package vk
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tusa-plus/core/utils"
+	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
-	"net/url"
+	"time"
 )
 
 type Vk struct {
-	logger         *zap.Logger
-	httpClientPool *utils.HTTPClientPool
+	logger *zap.Logger
 }
 
 const (
-	vkURL = "https://api.vk.com/method/users.get?"
+	vkURL     = "https://api.vk.com/method/users.get?"
+	vkVersion = "5.131"
+	timeout   = time.Second * 2
 )
 
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-///todo ничего пока не работает
-func (vk *Vk) GetID(ctx context.Context, vkToken string) (uint64, error) {
-	params := url.Values{}
+func (vk *Vk) GetID(vkToken string) (uint64, error) {
+	request := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(request)
+	params := fasthttp.AcquireArgs()
+	defer fasthttp.ReleaseArgs(params)
 	params.Add("access_token", vkToken)
-	params.Add("v", "5.131")
-	request, err := http.NewRequest("GET", vkURL+params.Encode(), nil)
-	if err != nil {
+	params.Add("v", vkVersion)
+	request.SetRequestURI(vkURL + params.String())
+	response := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(response)
+	if err := fasthttp.DoTimeout(request, response, timeout); err != nil {
 		vk.logger.Error("unexpected error during creating request",
 			zap.Error(err),
 			zap.String("access_token", vkToken),
 		)
 		return 0, ErrDoRequest
 	}
-	client := vk.httpClientPool.Get()
-	defer vk.httpClientPool.Put(client)
-	response, err := client.Do(request.WithContext(ctx))
-	if err != nil {
-		vk.logger.Error("unexpected error during request",
-			zap.Error(err),
-			zap.String("access_token", vkToken),
-		)
-		return 0, ErrDoRequest
+	var vkResponse struct {
+		Accounts []struct {
+			Id uint64 `json:"id"`
+		} `json:"response"`
 	}
-	defer func() {
-		if err = response.Body.Close(); err != nil {
-			vk.logger.Error("unexpected error during body close",
-				zap.Error(err),
-			)
-		}
-	}()
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		vk.logger.Error("unexpected error during read body",
-			zap.Error(err),
-		)
-		return 0, ErrDoRequest
-	}
-	var responseJSON map[string]json.RawMessage
-	if err := json.Unmarshal(body, &responseJSON); err != nil {
+	if err := json.Unmarshal(response.Body(), &vkResponse); err != nil || len(vkResponse.Accounts) == 0 {
 		return 0, ErrValidate
 	}
-	var answer []json.RawMessage
-	if err := json.Unmarshal(responseJSON["response"], &answer); err != nil {
-		return 0, ErrValidate
-	}
-	var profileInfo map[string]json.RawMessage
-	if err := json.Unmarshal(answer[0], &profileInfo); err != nil {
-		return 0, ErrValidate
-	}
-	var id uint64
-	if err := json.Unmarshal(profileInfo["id"], &id); err != nil {
-		return 0, ErrValidate
-	}
-	return id, nil
+	return vkResponse.Accounts[0].Id, nil
 }

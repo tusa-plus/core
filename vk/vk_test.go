@@ -1,9 +1,7 @@
 package vk
 
 import (
-	"context"
 	"errors"
-	"github.com/tusa-plus/core/utils"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
 	"testing"
@@ -19,12 +17,10 @@ func Test_VkGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	pool := utils.NewHTTPClientPool()
 	vk := Vk{
-		httpClientPool: &pool,
 		logger:         logger,
 	}
-	email, err := vk.GetID(context.Background(), cfg.Section("vk").Key("token").String())
+	email, err := vk.GetID(cfg.Section("vk").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -40,14 +36,12 @@ func Test_VkGetEmailInvalidToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	pool := utils.NewHTTPClientPool()
 	vk := Vk{
-		httpClientPool: &pool,
 		logger:         logger,
 	}
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
-		if _, err = vk.GetID(context.Background(), invalidTokens[index]); !errors.Is(err, ErrValidate) {
+		if _, err = vk.GetID(invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
 	}
