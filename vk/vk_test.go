@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test_VkGetEmail(t *testing.T) {
+func Test_VkGetId(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
@@ -17,16 +17,14 @@ func Test_VkGetEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	vk := Vk{
-		logger:         logger,
-	}
-	email, err := vk.GetID(cfg.Section("vk").Key("token").String())
+	vk := NewVk(logger)
+	id, err := vk.GetID(cfg.Section("vk").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	expectedEmail, _ := cfg.Section("vk").Key("id").Uint64()
-	if email != expectedEmail {
-		t.Fatalf("invalid email: expected %v, got %v", expectedEmail, email)
+	expectedId, _ := cfg.Section("vk").Key("id").Uint64()
+	if id != expectedId {
+		t.Fatalf("id email: expected %v, got %v", expectedId, id)
 	}
 }
 
@@ -36,13 +34,32 @@ func Test_VkGetEmailInvalidToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	vk := Vk{
-		logger:         logger,
-	}
+	vk := NewVk(logger)
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
 		if _, err = vk.GetID(invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
+	}
+}
+
+func Test_VkMockOk(t *testing.T) {
+	t.Parallel()
+	vk := NewMockVk()
+	result, err := vk.GetID("123")
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	if result != 123 {
+		t.Fatalf("id: expected %v, got %v", 123, result)
+	}
+}
+
+func Test_VkMockInvalid(t *testing.T) {
+	t.Parallel()
+	vk := NewMockVk()
+	_, err := vk.GetID("aafw")
+	if err == nil {
+		t.Fatalf("expected validation error")
 	}
 }

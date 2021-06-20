@@ -5,12 +5,29 @@ import (
 	"fmt"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
+	"strconv"
 	"time"
 )
 
-type Vk struct {
+type Vk interface {
+	GetID(vkToken string) (uint64, error)
+}
+
+func NewVk(logger *zap.Logger) Vk {
+	return &vkDefaultImpl{
+		logger: logger,
+	}
+}
+
+func NewMockVk() Vk {
+	return &vkMockImpl{}
+}
+
+type vkDefaultImpl struct {
 	logger *zap.Logger
 }
+
+type vkMockImpl struct{}
 
 const (
 	vkURL     = "https://api.vk.com/method/users.get?"
@@ -21,7 +38,7 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (vk *Vk) GetID(vkToken string) (uint64, error) {
+func (vk *vkDefaultImpl) GetID(vkToken string) (uint64, error) {
 	request := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(request)
 	params := fasthttp.AcquireArgs()
@@ -47,4 +64,12 @@ func (vk *Vk) GetID(vkToken string) (uint64, error) {
 		return 0, ErrValidate
 	}
 	return vkResponse.Accounts[0].Id, nil
+}
+
+func (vk *vkMockImpl) GetID(vkToken string) (uint64, error) {
+	res, err := strconv.ParseUint(vkToken, 10, 64)
+	if err != nil {
+		return 0, ErrValidate
+	}
+	return res, nil
 }
