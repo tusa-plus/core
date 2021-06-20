@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
-	"strconv"
 	"time"
 )
 
 type Vk interface {
-	GetID(vkToken string) (uint64, error)
+	GetID(vkToken string) (*Account, error)
+}
+
+type Account struct {
+	Id      uint64 `json:"id"`
+	Name    string `json:"first_name"`
+	Surname string `json:"last_name"`
+	Photo   string `json:"photo_max"`
 }
 
 func NewVk(logger *zap.Logger) Vk {
@@ -19,15 +25,9 @@ func NewVk(logger *zap.Logger) Vk {
 	}
 }
 
-func NewMockVk() Vk {
-	return &vkMockImpl{}
-}
-
 type vkDefaultImpl struct {
 	logger *zap.Logger
 }
-
-type vkMockImpl struct{}
 
 const (
 	vkURL     = "https://api.vk.com/method/users.get?"
@@ -38,12 +38,13 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (vk *vkDefaultImpl) GetID(vkToken string) (uint64, error) {
+func (vk *vkDefaultImpl) GetID(vkToken string) (*Account, error) {
 	request := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(request)
 	params := fasthttp.AcquireArgs()
 	defer fasthttp.ReleaseArgs(params)
 	params.Add("access_token", vkToken)
+	params.Add("fields", "photo_max")
 	params.Add("v", vkVersion)
 	request.SetRequestURI(vkURL + params.String())
 	response := fasthttp.AcquireResponse()
@@ -53,23 +54,13 @@ func (vk *vkDefaultImpl) GetID(vkToken string) (uint64, error) {
 			zap.Error(err),
 			zap.String("access_token", vkToken),
 		)
-		return 0, ErrDoRequest
+		return nil, ErrDoRequest
 	}
 	var vkResponse struct {
-		Accounts []struct {
-			Id uint64 `json:"id"`
-		} `json:"response"`
+		Accounts []Account `json:"response"`
 	}
 	if err := json.Unmarshal(response.Body(), &vkResponse); err != nil || len(vkResponse.Accounts) == 0 {
-		return 0, ErrValidate
+		return nil, ErrValidate
 	}
-	return vkResponse.Accounts[0].Id, nil
-}
-
-func (vk *vkMockImpl) GetID(vkToken string) (uint64, error) {
-	res, err := strconv.ParseUint(vkToken, 10, 64)
-	if err != nil {
-		return 0, ErrValidate
-	}
-	return res, nil
+	return &vkResponse.Accounts[0], nil
 }

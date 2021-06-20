@@ -18,13 +18,25 @@ func Test_VkGetId(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	vk := NewVk(logger)
-	id, err := vk.GetID(cfg.Section("vk").Key("token").String())
+	account, err := vk.GetID(cfg.Section("vk").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	expectedId, _ := cfg.Section("vk").Key("id").Uint64()
-	if id != expectedId {
-		t.Fatalf("id email: expected %v, got %v", expectedId, id)
+	if account.Id != expectedId {
+		t.Fatalf("id: expected %v, got %v", expectedId, account.Id)
+	}
+	expectedName := cfg.Section("vk").Key("name").String()
+	if account.Name != expectedName {
+		t.Fatalf("name: expected %v, got %v", expectedName, account.Name)
+	}
+	expectedSurname := cfg.Section("vk").Key("surname").String()
+	if account.Surname != expectedSurname {
+		t.Fatalf("surname: expected %v, got %v", expectedSurname, account.Surname)
+	}
+	expectedPhoto := cfg.Section("vk").Key("photo").String()
+	if account.Photo != expectedPhoto {
+		t.Fatalf("photo: expected %v, got %v", expectedPhoto, account.Photo)
 	}
 }
 
@@ -40,26 +52,5 @@ func Test_VkGetEmailInvalidToken(t *testing.T) {
 		if _, err = vk.GetID(invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
-	}
-}
-
-func Test_VkMockOk(t *testing.T) {
-	t.Parallel()
-	vk := NewMockVk()
-	result, err := vk.GetID("123")
-	if err != nil {
-		t.Fatalf("unexpected error %v", err)
-	}
-	if result != 123 {
-		t.Fatalf("id: expected %v, got %v", 123, result)
-	}
-}
-
-func Test_VkMockInvalid(t *testing.T) {
-	t.Parallel()
-	vk := NewMockVk()
-	_, err := vk.GetID("aafw")
-	if err == nil {
-		t.Fatalf("expected validation error")
 	}
 }
