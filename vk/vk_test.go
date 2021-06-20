@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test_VkGetId(t *testing.T) {
+func Test_VkGetAccount(t *testing.T) {
 	t.Parallel()
 	logger, err := zap.NewProduction()
 	if err != nil {
@@ -18,7 +18,7 @@ func Test_VkGetId(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	vk := NewVk(logger)
-	account, err := vk.GetID(cfg.Section("vk").Key("token").String())
+	account, err := vk.GetAccount(cfg.Section("vk").Key("token").String())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -49,7 +49,7 @@ func Test_VkGetEmailInvalidToken(t *testing.T) {
 	vk := NewVk(logger)
 	invalidTokens := []string{"", "abcefre", "32424++_!>?|~`"}
 	for index := range invalidTokens {
-		if _, err = vk.GetID(invalidTokens[index]); !errors.Is(err, ErrValidate) {
+		if _, err = vk.GetAccount(invalidTokens[index]); !errors.Is(err, ErrValidate) {
 			t.Fatalf("expected validation error: %v", err)
 		}
 	}
