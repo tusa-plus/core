@@ -26,6 +26,10 @@ func Test_VkGetAccount(t *testing.T) {
 	if account.Id != expectedId {
 		t.Fatalf("id: expected %v, got %v", expectedId, account.Id)
 	}
+	expectedSex, _ := cfg.Section("vk").Key("sex").Int()
+	if account.Sex != expectedSex {
+		t.Fatalf("id: expected %v, got %v", expectedSex, account.Sex)
+	}
 	expectedName := cfg.Section("vk").Key("name").String()
 	if account.Name != expectedName {
 		t.Fatalf("name: expected %v, got %v", expectedName, account.Name)

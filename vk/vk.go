@@ -17,6 +17,7 @@ type Account struct {
 	Name    string `json:"first_name"`
 	Surname string `json:"last_name"`
 	Photo   string `json:"photo_max"`
+	Sex     int    `json:"sex"`
 }
 
 func NewVk(logger *zap.Logger) Vk {
@@ -44,7 +45,7 @@ func (vk *vkDefaultImpl) GetAccount(vkToken string) (*Account, error) {
 	params := fasthttp.AcquireArgs()
 	defer fasthttp.ReleaseArgs(params)
 	params.Add("access_token", vkToken)
-	params.Add("fields", "photo_max")
+	params.Add("fields", "photo_max,sex")
 	params.Add("v", vkVersion)
 	request.SetRequestURI(vkURL + params.String())
 	response := fasthttp.AcquireResponse()
