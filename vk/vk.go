@@ -9,7 +9,7 @@ import (
 )
 
 type Vk interface {
-	GetID(vkToken string) (*Account, error)
+	GetAccount(vkToken string) (*Account, error)
 }
 
 type Account struct {
@@ -38,7 +38,7 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (vk *vkDefaultImpl) GetID(vkToken string) (*Account, error) {
+func (vk *vkDefaultImpl) GetAccount(vkToken string) (*Account, error) {
 	request := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(request)
 	params := fasthttp.AcquireArgs()
