@@ -125,6 +125,18 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
+  lint-vk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint Vk
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.40
+          working-directory: vk
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+          
   lint-email:
     runs-on: ubuntu-latest
     steps:
