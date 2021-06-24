@@ -11,9 +11,38 @@ import (
 	"net/url"
 )
 
-type Facebook struct {
+type Facebook interface {
+	GetEmail(ctx context.Context, fbToken string) (string, error)
+}
+
+type facebookDefaultImpl struct {
 	logger         *zap.Logger
 	httpClientPool *utils.HTTPClientPool
+}
+
+type facebookMock struct{}
+
+func NewMockFacebook() Facebook {
+	return &facebookMock{}
+}
+
+func NewFacebook(logger *zap.Logger, pool *utils.HTTPClientPool) (Facebook, error) {
+	if logger == nil {
+		var err error
+		logger, err = zap.NewProduction()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create zap logger: %w", err)
+		}
+	}
+	if pool == nil {
+		newPool := utils.NewHTTPClientPool()
+		pool = &newPool
+	}
+	facebook := facebookDefaultImpl{
+		logger:         logger,
+		httpClientPool: pool,
+	}
+	return &facebook, nil
 }
 
 const (
@@ -23,7 +52,7 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error) {
+func (fb *facebookDefaultImpl) GetEmail(ctx context.Context, fbToken string) (string, error) {
 	params := url.Values{}
 	params.Add("fields", "email")
 	params.Add("access_token", fbToken)
@@ -68,4 +97,8 @@ func (fb *Facebook) GetEmail(ctx context.Context, fbToken string) (string, error
 		return "", ErrValidate
 	}
 	return email, nil
+}
+
+func (fb *facebookMock) GetEmail(_ context.Context, fbToken string) (string, error) {
+	return fbToken, nil
 }

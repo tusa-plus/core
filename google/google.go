@@ -10,9 +10,38 @@ import (
 	"net/http"
 )
 
-type Google struct {
+type Google interface {
+	GetEmail(ctx context.Context, googleToken string) (string, error)
+}
+
+type googleDefaultImpl struct {
 	logger         *zap.Logger
 	httpClientPool *utils.HTTPClientPool
+}
+
+type googleMock struct{}
+
+func NewMockGoogle() Google {
+	return &googleMock{}
+}
+
+func NewGoogle(logger *zap.Logger, pool *utils.HTTPClientPool) (Google, error) {
+	if logger == nil {
+		var err error
+		logger, err = zap.NewProduction()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create zap logger: %w", err)
+		}
+	}
+	if pool == nil {
+		newPool := utils.NewHTTPClientPool()
+		pool = &newPool
+	}
+	google := &googleDefaultImpl{
+		logger:         logger,
+		httpClientPool: pool,
+	}
+	return google, nil
 }
 
 const (
@@ -22,7 +51,7 @@ const (
 var ErrDoRequest = fmt.Errorf("failed to request")
 var ErrValidate = fmt.Errorf("failed to validate result")
 
-func (google *Google) GetEmail(ctx context.Context, googleToken string) (string, error) {
+func (google *googleDefaultImpl) GetEmail(ctx context.Context, googleToken string) (string, error) {
 	request, err := http.NewRequest("GET", googleURL, nil)
 	if err != nil {
 		google.logger.Error("unexpected error during creating request",
@@ -65,4 +94,8 @@ func (google *Google) GetEmail(ctx context.Context, googleToken string) (string,
 		return "", ErrValidate
 	}
 	return email, nil
+}
+
+func (fb *googleMock) GetEmail(_ context.Context, fbToken string) (string, error) {
+	return fbToken, nil
 }
