@@ -15,12 +15,11 @@ type Vk interface {
 }
 
 type Account struct {
-	ID      uint64   `json:"id"`
-	Name    string   `json:"first_name"`
-	Surname string   `json:"last_name"`
-	Photo   string   `json:"photo_max"`
-	Sex     int      `json:"sex"`
-	Friends []uint64 `json:"friends"`
+	ID      uint64 `json:"id"`
+	Name    string `json:"first_name"`
+	Surname string `json:"last_name"`
+	Photo   string `json:"photo_max"`
+	Sex     int    `json:"sex"`
 }
 
 func NewVk(logger *zap.Logger) Vk {
