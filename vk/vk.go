@@ -15,7 +15,7 @@ type Vk interface {
 }
 
 type Account struct {
-	Id      uint64   `json:"id"`
+	ID      uint64   `json:"id"`
 	Name    string   `json:"first_name"`
 	Surname string   `json:"last_name"`
 	Photo   string   `json:"photo_max"`
